@@ -140,30 +140,53 @@ function StickyHero() {
     target: ref,
     offset: ["start start", "end end"],
   });
-  const videoScale = useTransform(scrollYProgress, [0, 0.55, 1], [1.055, 1.025, 1]);
-  const videoOpacity = useTransform(scrollYProgress, [0, 0.86, 1], [1, 1, 0.5]);
-  const ctaOpacity = useTransform(scrollYProgress, [0.86, 0.89], [0, 1]);
-  const ctaY = useTransform(scrollYProgress, [0.86, 0.89], [16, 0]);
+  const videoScale = useTransform(scrollYProgress, [0, 0.6, 1], [1.04, 1.015, 1]);
+  const videoOpacity = useTransform(scrollYProgress, [0, 0.82, 1], [1, 1, 0.56]);
+  const ctaOpacity = useTransform(scrollYProgress, [0.78, 0.82], [0, 1]);
+  const ctaY = useTransform(scrollYProgress, [0.78, 0.82], [14, 0]);
 
   useEffect(() => {
-    return scrollYProgress.on("change", (latest) => {
+    let animationFrame = 0;
+    let nextProgress = scrollYProgress.get();
+
+    const syncVideo = () => {
       const video = videoRef.current;
       const duration = videoDurationRef.current || video?.duration || 0;
 
-      if (!video || !Number.isFinite(duration) || duration <= 0) {
-        return;
+      if (video && Number.isFinite(duration) && duration > 0) {
+        const scrubDuration = Math.min(duration - 0.05, 4.8);
+        const targetTime = Math.min(
+          scrubDuration,
+          Math.max(0, nextProgress * scrubDuration),
+        );
+
+        if (Math.abs(video.currentTime - targetTime) > 0.04) {
+          video.currentTime = targetTime;
+        }
       }
 
-      const targetTime = Math.min(duration - 0.05, Math.max(0, latest * duration));
+      animationFrame = 0;
+    };
 
-      if (Math.abs(video.currentTime - targetTime) > 0.015) {
-        video.currentTime = targetTime;
+    const unsubscribe = scrollYProgress.on("change", (latest) => {
+      nextProgress = latest;
+
+      if (!animationFrame) {
+        animationFrame = requestAnimationFrame(syncVideo);
       }
     });
+
+    return () => {
+      unsubscribe();
+
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
   }, [scrollYProgress]);
 
   return (
-    <section ref={ref} className="relative h-[520vh]">
+    <section ref={ref} className="relative h-[380vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
         <motion.video
           ref={videoRef}
@@ -199,7 +222,7 @@ function StickyHero() {
           </a>
         </div>
 
-        <HeroText progress={scrollYProgress} range={[0.015, 0.045, 0.19, 0.22]}>
+        <HeroText progress={scrollYProgress} range={[0.02, 0.06, 0.17, 0.2]}>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.42em] text-[#f3d99a]">
             Morelos real estate
           </p>
@@ -207,17 +230,17 @@ function StickyHero() {
             {storySteps[0]}
           </h1>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.24, 0.27, 0.41, 0.44]}>
+        <HeroText progress={scrollYProgress} range={[0.23, 0.27, 0.38, 0.41]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[1]}
           </h2>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.465, 0.495, 0.635, 0.665]}>
+        <HeroText progress={scrollYProgress} range={[0.44, 0.48, 0.59, 0.62]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[2]}
           </h2>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.69, 0.72, 0.855, 0.885]}>
+        <HeroText progress={scrollYProgress} range={[0.65, 0.69, 0.79, 0.82]}>
           <p className="mx-auto mb-5 max-w-2xl text-base uppercase tracking-[0.36em] text-[#f3d99a]/90">
             {slogan}
           </p>
