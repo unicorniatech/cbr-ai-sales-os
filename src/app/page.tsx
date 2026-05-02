@@ -138,6 +138,7 @@ function StickyHero() {
   const ref = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoDurationRef = useRef(0);
+  const videoReadyRef = useRef(false);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
@@ -160,11 +161,15 @@ function StickyHero() {
       const video = videoRef.current;
       const duration = videoDurationRef.current || video?.duration || 0;
 
-      if (video && Number.isFinite(duration) && duration > 0) {
+      if (video && videoReadyRef.current && Number.isFinite(duration) && duration > 0) {
+        if (!video.paused) {
+          video.pause();
+        }
+
         const storyProgress = Math.min(1, Math.max(0, (nextProgress - 0.22) / 0.72));
         const targetTime = Math.min(duration - 0.04, storyProgress * (duration - 0.04));
 
-        if (Math.abs(video.currentTime - targetTime) > 0.035) {
+        if (Math.abs(video.currentTime - targetTime) > 0.02) {
           video.currentTime = targetTime;
         }
       }
@@ -194,7 +199,7 @@ function StickyHero() {
       <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
         <motion.div
           style={{ scale: mediaScale, opacity: mediaOpacity }}
-          className="absolute inset-0 bg-[url('/videos/CBR-intro.webp')] bg-cover bg-center sm:bg-[center_42%]"
+          className="absolute inset-0 bg-[url('/videos/CBR-intro-poster.jpg')] bg-cover bg-center sm:bg-[center_42%]"
           aria-hidden="true"
         />
         <motion.video
@@ -204,12 +209,17 @@ function StickyHero() {
           src="/videos/CBR-intro-scroll.mp4"
           muted
           playsInline
+          disablePictureInPicture
           preload="auto"
           onLoadedMetadata={(event) => {
             const video = event.currentTarget;
             videoDurationRef.current = video.duration;
+            videoReadyRef.current = true;
             video.pause();
             video.currentTime = 0;
+          }}
+          onPlay={(event) => {
+            event.currentTarget.pause();
           }}
         />
         <div
