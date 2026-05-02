@@ -5,7 +5,6 @@ import {
   AnimatePresence,
   motion,
   useScroll,
-  useSpring,
   useTransform,
   type MotionValue,
 } from "framer-motion";
@@ -89,9 +88,9 @@ const trustItems = [
 function useLenis() {
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.055,
-      wheelMultiplier: 0.72,
-      touchMultiplier: 1.2,
+      lerp: 0.095,
+      wheelMultiplier: 0.98,
+      touchMultiplier: 1.35,
     });
 
     let frame = 0;
@@ -141,19 +140,13 @@ function StickyHero() {
     target: ref,
     offset: ["start start", "end end"],
   });
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 42,
-    damping: 24,
-    mass: 0.38,
-    restDelta: 0.0008,
-  });
-  const videoScale = useTransform(smoothProgress, [0, 1], [1.045, 1]);
-  const videoOpacity = useTransform(smoothProgress, [0, 0.86, 1], [1, 1, 0.42]);
-  const ctaOpacity = useTransform(smoothProgress, [0.9, 0.93], [0, 1]);
-  const ctaY = useTransform(smoothProgress, [0.9, 0.93], [18, 0]);
+  const videoScale = useTransform(scrollYProgress, [0, 0.55, 1], [1.055, 1.025, 1]);
+  const videoOpacity = useTransform(scrollYProgress, [0, 0.86, 1], [1, 1, 0.5]);
+  const ctaOpacity = useTransform(scrollYProgress, [0.86, 0.89], [0, 1]);
+  const ctaY = useTransform(scrollYProgress, [0.86, 0.89], [16, 0]);
 
   useEffect(() => {
-    return smoothProgress.on("change", (latest) => {
+    return scrollYProgress.on("change", (latest) => {
       const video = videoRef.current;
       const duration = videoDurationRef.current || video?.duration || 0;
 
@@ -167,10 +160,10 @@ function StickyHero() {
         video.currentTime = targetTime;
       }
     });
-  }, [smoothProgress]);
+  }, [scrollYProgress]);
 
   return (
-    <section ref={ref} className="relative h-[720vh]">
+    <section ref={ref} className="relative h-[520vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
         <motion.video
           ref={videoRef}
@@ -206,7 +199,7 @@ function StickyHero() {
           </a>
         </div>
 
-        <HeroText progress={smoothProgress} range={[0.02, 0.045, 0.21, 0.24]}>
+        <HeroText progress={scrollYProgress} range={[0.015, 0.045, 0.19, 0.22]}>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.42em] text-[#f3d99a]">
             Morelos real estate
           </p>
@@ -214,17 +207,17 @@ function StickyHero() {
             {storySteps[0]}
           </h1>
         </HeroText>
-        <HeroText progress={smoothProgress} range={[0.25, 0.275, 0.44, 0.47]}>
+        <HeroText progress={scrollYProgress} range={[0.24, 0.27, 0.41, 0.44]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[1]}
           </h2>
         </HeroText>
-        <HeroText progress={smoothProgress} range={[0.48, 0.505, 0.67, 0.7]}>
+        <HeroText progress={scrollYProgress} range={[0.465, 0.495, 0.635, 0.665]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[2]}
           </h2>
         </HeroText>
-        <HeroText progress={smoothProgress} range={[0.71, 0.735, 0.89, 0.92]}>
+        <HeroText progress={scrollYProgress} range={[0.69, 0.72, 0.855, 0.885]}>
           <p className="mx-auto mb-5 max-w-2xl text-base uppercase tracking-[0.36em] text-[#f3d99a]/90">
             {slogan}
           </p>
