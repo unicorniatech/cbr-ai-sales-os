@@ -236,6 +236,102 @@ function PipelineColumn({ stage, items }: { stage: LeadStage; items: Lead[] }) {
   );
 }
 
+function LeadDetailPanel({ selectedLead }: { selectedLead: Lead }) {
+  return (
+    <div className="border border-white/10 bg-white/[0.025] p-5">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.22em] text-white/38">
+            Lead seleccionado
+          </p>
+          <h1 className="mt-3 text-2xl font-semibold">{selectedLead.name}</h1>
+          <p className="mt-1 text-sm text-white/45">{selectedLead.id}</p>
+        </div>
+        <TemperatureBadge value={selectedLead.temperature} />
+      </div>
+
+      <div className="space-y-3 border-y border-white/10 py-4 text-sm">
+        <p className="flex items-center justify-between gap-4">
+          <span className="text-white/42">Teléfono</span>
+          <span className="text-white">{selectedLead.phone}</span>
+        </p>
+        <p className="flex items-center justify-between gap-4">
+          <span className="text-white/42">Interés</span>
+          <span className="text-white">{selectedLead.interest}</span>
+        </p>
+        <p className="flex items-center justify-between gap-4">
+          <span className="text-white/42">Etapa</span>
+          <span className="text-white">{selectedLead.stage}</span>
+        </p>
+        <p className="flex items-center justify-between gap-4">
+          <span className="text-white/42">Presupuesto</span>
+          <span className="text-white">{selectedLead.budget}</span>
+        </p>
+      </div>
+
+      <div className="mt-4">
+        <p className="mb-2 text-xs uppercase tracking-[0.22em] text-white/38">Notas</p>
+        <p className="text-sm leading-7 text-white/68">{selectedLead.notes}</p>
+      </div>
+
+      <div className="mt-5 grid gap-3">
+        <button className="inline-flex min-h-11 items-center justify-center gap-2 bg-[#d8b86f] px-4 text-sm font-semibold text-[#07111f] transition hover:bg-[#f3d99a]">
+          <Phone size={17} />
+          Llamar lead
+        </button>
+        <button className="inline-flex min-h-11 items-center justify-center gap-2 border border-white/10 px-4 text-sm text-white/70 transition hover:border-[#d8b86f]/60 hover:text-[#f3d99a]">
+          <MessageCircle size={17} />
+          WhatsApp
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TasksPanel() {
+  return (
+    <div className="border border-white/10 bg-white/[0.025] p-5">
+      <p className="font-semibold">Próximas tareas</p>
+      <div className="mt-4 space-y-4">
+        {[
+          ["Hoy 12:30", "Enviar ubicación a Roberto"],
+          ["Hoy 16:00", "Confirmar visita con Mariana"],
+          ["Mañana", "Reactivar cold leads sin respuesta"],
+        ].map(([time, task]) => (
+          <div key={task} className="flex gap-3">
+            <span className="grid size-9 shrink-0 place-items-center border border-[#d8b86f]/35 bg-[#d8b86f]/10 text-[#f3d99a]">
+              <CalendarClock size={16} />
+            </span>
+            <div>
+              <p className="text-sm text-white/75">{task}</p>
+              <p className="mt-1 text-xs text-white/35">{time}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RealtimeReadyPanel() {
+  return (
+    <div className="border border-white/10 bg-[#071321] p-5">
+      <div className="flex items-center gap-3 text-[#f3d99a]">
+        <ShieldCheck size={20} />
+        <p className="font-semibold">Preparado para realtime</p>
+      </div>
+      <p className="mt-3 text-sm leading-7 text-white/58">
+        La UI ya separa leads, actividad, pipeline y detalle. El siguiente paso es
+        conectar Supabase: tabla de leads, eventos en vivo, auth de admin y acciones.
+      </p>
+      <div className="mt-4 flex items-center gap-2 text-xs text-white/42">
+        <BadgeCheck size={15} className="text-[#f3d99a]" />
+        Frontend listo para backend
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [selectedLeadId, setSelectedLeadId] = useState(leads[0].id);
   const [filter, setFilter] = useState<"all" | LeadTemperature>("all");
@@ -282,7 +378,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-[1600px] gap-6 px-5 py-6 lg:grid-cols-[260px_1fr_340px] lg:px-8">
+      <div className="mx-auto grid max-w-[1600px] gap-6 px-5 py-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:px-8 2xl:grid-cols-[260px_minmax(0,1fr)_340px]">
         <aside className="hidden border border-white/10 bg-white/[0.025] p-4 lg:block">
           <p className="mb-4 text-xs uppercase tracking-[0.24em] text-white/38">Operación</p>
           {["Dashboard", "Leads", "Pipeline", "Tareas", "Asesor IA", "Reportes"].map((item, index) => (
@@ -456,92 +552,20 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
+
+          <div className="grid gap-6 xl:grid-cols-2 2xl:hidden">
+            <LeadDetailPanel selectedLead={selectedLead} />
+            <div className="space-y-6">
+              <TasksPanel />
+              <RealtimeReadyPanel />
+            </div>
+          </div>
         </section>
 
-        <aside className="space-y-6">
-          <div className="border border-white/10 bg-white/[0.025] p-5">
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-white/38">
-                  Lead seleccionado
-                </p>
-                <h1 className="mt-3 text-2xl font-semibold">{selectedLead.name}</h1>
-                <p className="mt-1 text-sm text-white/45">{selectedLead.id}</p>
-              </div>
-              <TemperatureBadge value={selectedLead.temperature} />
-            </div>
-
-            <div className="space-y-3 border-y border-white/10 py-4 text-sm">
-              <p className="flex items-center justify-between gap-4">
-                <span className="text-white/42">Teléfono</span>
-                <span className="text-white">{selectedLead.phone}</span>
-              </p>
-              <p className="flex items-center justify-between gap-4">
-                <span className="text-white/42">Interés</span>
-                <span className="text-white">{selectedLead.interest}</span>
-              </p>
-              <p className="flex items-center justify-between gap-4">
-                <span className="text-white/42">Etapa</span>
-                <span className="text-white">{selectedLead.stage}</span>
-              </p>
-              <p className="flex items-center justify-between gap-4">
-                <span className="text-white/42">Presupuesto</span>
-                <span className="text-white">{selectedLead.budget}</span>
-              </p>
-            </div>
-
-            <div className="mt-4">
-              <p className="mb-2 text-xs uppercase tracking-[0.22em] text-white/38">Notas</p>
-              <p className="text-sm leading-7 text-white/68">{selectedLead.notes}</p>
-            </div>
-
-            <div className="mt-5 grid gap-3">
-              <button className="inline-flex min-h-11 items-center justify-center gap-2 bg-[#d8b86f] px-4 text-sm font-semibold text-[#07111f] transition hover:bg-[#f3d99a]">
-                <Phone size={17} />
-                Llamar lead
-              </button>
-              <button className="inline-flex min-h-11 items-center justify-center gap-2 border border-white/10 px-4 text-sm text-white/70 transition hover:border-[#d8b86f]/60 hover:text-[#f3d99a]">
-                <MessageCircle size={17} />
-                WhatsApp
-              </button>
-            </div>
-          </div>
-
-          <div className="border border-white/10 bg-white/[0.025] p-5">
-            <p className="font-semibold">Próximas tareas</p>
-            <div className="mt-4 space-y-4">
-              {[
-                ["Hoy 12:30", "Enviar ubicación a Roberto"],
-                ["Hoy 16:00", "Confirmar visita con Mariana"],
-                ["Mañana", "Reactivar cold leads sin respuesta"],
-              ].map(([time, task]) => (
-                <div key={task} className="flex gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center border border-[#d8b86f]/35 bg-[#d8b86f]/10 text-[#f3d99a]">
-                    <CalendarClock size={16} />
-                  </span>
-                  <div>
-                    <p className="text-sm text-white/75">{task}</p>
-                    <p className="mt-1 text-xs text-white/35">{time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="border border-white/10 bg-[#071321] p-5">
-            <div className="flex items-center gap-3 text-[#f3d99a]">
-              <ShieldCheck size={20} />
-              <p className="font-semibold">Preparado para realtime</p>
-            </div>
-            <p className="mt-3 text-sm leading-7 text-white/58">
-              La UI ya separa leads, actividad, pipeline y detalle. El siguiente paso es
-              conectar Supabase: tabla de leads, eventos en vivo, auth de admin y acciones.
-            </p>
-            <div className="mt-4 flex items-center gap-2 text-xs text-white/42">
-              <BadgeCheck size={15} className="text-[#f3d99a]" />
-              Frontend listo para backend
-            </div>
-          </div>
+        <aside className="hidden space-y-6 2xl:block">
+          <LeadDetailPanel selectedLead={selectedLead} />
+          <TasksPanel />
+          <RealtimeReadyPanel />
         </aside>
       </div>
     </main>
