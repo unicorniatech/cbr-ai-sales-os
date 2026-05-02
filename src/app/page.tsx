@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
-import Image from "next/image";
 import {
   AnimatePresence,
   motion,
@@ -14,7 +13,6 @@ import {
   ArrowRight,
   BadgeCheck,
   Bot,
-  ChevronDown,
   CheckCircle2,
   ChevronRight,
   FileCheck2,
@@ -143,15 +141,10 @@ function StickyHero() {
     target: ref,
     offset: ["start start", "end end"],
   });
-  const mediaScale = useTransform(scrollYProgress, [0, 0.66, 1], [1.045, 1.016, 1]);
-  const mediaOpacity = useTransform(scrollYProgress, [0, 0.86, 1], [1, 1, 0.56]);
-  const logoOpacity = useTransform(scrollYProgress, [0, 0.03, 0.2, 0.25], [0, 1, 1, 0]);
-  const logoY = useTransform(scrollYProgress, [0, 0.03, 0.25], [20, 0, -20]);
-  const logoScale = useTransform(scrollYProgress, [0, 0.03, 0.25], [0.97, 1, 0.985]);
-  const videoOpacity = useTransform(scrollYProgress, [0.18, 0.27], [0, 1]);
-  const scrollCueOpacity = useTransform(scrollYProgress, [0, 0.04, 0.2, 0.3], [0, 1, 1, 0]);
-  const ctaOpacity = useTransform(scrollYProgress, [0.82, 0.86], [0, 1]);
-  const ctaY = useTransform(scrollYProgress, [0.82, 0.86], [14, 0]);
+  const videoScale = useTransform(scrollYProgress, [0, 0.55, 1], [1.055, 1.025, 1]);
+  const videoOpacity = useTransform(scrollYProgress, [0, 0.86, 1], [1, 1, 0.5]);
+  const ctaOpacity = useTransform(scrollYProgress, [0.86, 0.89], [0, 1]);
+  const ctaY = useTransform(scrollYProgress, [0.86, 0.89], [16, 0]);
 
   useEffect(() => {
     let animationFrame = 0;
@@ -161,17 +154,19 @@ function StickyHero() {
       const video = videoRef.current;
       const duration = videoDurationRef.current || video?.duration || 0;
 
-      if (video && videoReadyRef.current && Number.isFinite(duration) && duration > 0) {
-        if (!video.paused) {
-          video.pause();
-        }
+      if (!video || !videoReadyRef.current || !Number.isFinite(duration) || duration <= 0) {
+        animationFrame = 0;
+        return;
+      }
 
-        const storyProgress = Math.min(1, Math.max(0, (nextProgress - 0.22) / 0.72));
-        const targetTime = Math.min(duration - 0.04, storyProgress * (duration - 0.04));
+      if (!video.paused) {
+        video.pause();
+      }
 
-        if (Math.abs(video.currentTime - targetTime) > 0.02) {
-          video.currentTime = targetTime;
-        }
+      const targetTime = Math.min(duration - 0.05, Math.max(0, nextProgress * duration));
+
+      if (Math.abs(video.currentTime - targetTime) > 0.015) {
+        video.currentTime = targetTime;
       }
 
       animationFrame = 0;
@@ -195,21 +190,15 @@ function StickyHero() {
   }, [scrollYProgress]);
 
   return (
-    <section ref={ref} className="relative h-[390vh]">
+    <section ref={ref} className="relative h-[320vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
-        <motion.div
-          style={{ scale: mediaScale, opacity: mediaOpacity }}
-          className="absolute inset-0 bg-[url('/videos/CBR-intro-poster.jpg')] bg-cover bg-center sm:bg-[center_42%]"
-          aria-hidden="true"
-        />
         <motion.video
           ref={videoRef}
-          style={{ scale: mediaScale, opacity: videoOpacity }}
-          className="absolute inset-0 h-full w-full object-cover object-center sm:object-[center_42%]"
-          src="/videos/CBR-intro-scroll.mp4"
+          style={{ scale: videoScale, opacity: videoOpacity }}
+          className="absolute inset-0 h-full w-full object-cover"
+          src="/videos/CBR-introvideo.mp4"
           muted
           playsInline
-          disablePictureInPicture
           preload="auto"
           onLoadedMetadata={(event) => {
             const video = event.currentTarget;
@@ -222,10 +211,7 @@ function StickyHero() {
             event.currentTarget.pause();
           }}
         />
-        <div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(216,184,111,0.18),transparent_30%),linear-gradient(115deg,rgba(3,10,22,0.94)_0%,rgba(3,10,22,0.74)_48%,rgba(3,10,22,0.54)_100%)]"
-          aria-hidden="true"
-        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,rgba(204,164,88,0.22),transparent_32%),linear-gradient(115deg,rgba(3,10,22,0.95)_0%,rgba(3,10,22,0.72)_42%,rgba(3,10,22,0.5)_100%)]" />
         <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 py-5 text-sm text-white/80 sm:px-10">
           <a href="#inicio" className="group flex items-center gap-3">
             <span className="grid size-10 place-items-center border border-[#d7b56d]/60 bg-white/[0.06] text-[13px] font-semibold text-[#f3d99a] backdrop-blur">
@@ -244,21 +230,7 @@ function StickyHero() {
           </a>
         </div>
 
-        <motion.div
-          style={{ opacity: logoOpacity, y: logoY, scale: logoScale }}
-          className="absolute inset-x-0 top-1/2 z-10 mx-auto w-[min(86vw,640px)] -translate-y-1/2 px-5"
-        >
-          <Image
-            src="/brand/CBR-LOGO.webp"
-            alt="Grupo Inmobiliario Castrejón Rodríguez"
-            width={900}
-            height={600}
-            priority
-            className="h-auto w-full opacity-95 mix-blend-screen drop-shadow-[0_24px_80px_rgba(216,184,111,0.28)]"
-          />
-        </motion.div>
-
-        <HeroText progress={scrollYProgress} range={[0.27, 0.31, 0.41, 0.44]}>
+        <HeroText progress={scrollYProgress} range={[0.015, 0.045, 0.19, 0.22]}>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.42em] text-[#f3d99a]">
             Morelos real estate
           </p>
@@ -266,17 +238,17 @@ function StickyHero() {
             {storySteps[0]}
           </h1>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.47, 0.51, 0.61, 0.64]}>
+        <HeroText progress={scrollYProgress} range={[0.24, 0.27, 0.41, 0.44]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[1]}
           </h2>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.66, 0.7, 0.78, 0.81]}>
+        <HeroText progress={scrollYProgress} range={[0.465, 0.495, 0.635, 0.665]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[2]}
           </h2>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.83, 0.87, 0.94, 0.98]}>
+        <HeroText progress={scrollYProgress} range={[0.69, 0.72, 0.855, 0.885]}>
           <p className="mx-auto mb-5 max-w-2xl text-base uppercase tracking-[0.36em] text-[#f3d99a]/90">
             {slogan}
           </p>
@@ -284,21 +256,6 @@ function StickyHero() {
             {storySteps[3]}
           </h2>
         </HeroText>
-
-        <motion.a
-          href="#inicio"
-          style={{ opacity: scrollCueOpacity }}
-          className="absolute inset-x-0 bottom-8 z-20 mx-auto flex w-fit flex-col items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/72 transition hover:text-[#f3d99a] sm:bottom-10"
-        >
-          <span>Desliza</span>
-          <motion.span
-            animate={{ y: [0, 7, 0] }}
-            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-            className="grid size-9 place-items-center border border-white/20 bg-white/[0.06] backdrop-blur"
-          >
-            <ChevronDown size={18} aria-hidden="true" />
-          </motion.span>
-        </motion.a>
 
         <motion.div
           style={{ opacity: ctaOpacity, y: ctaY }}
