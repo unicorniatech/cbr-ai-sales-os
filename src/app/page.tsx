@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import Image from "next/image";
 import {
   AnimatePresence,
   motion,
@@ -24,6 +25,7 @@ import {
   ShieldCheck,
   Trees,
 } from "lucide-react";
+import { AdvisorChat } from "./components/advisor-chat";
 
 const brand = "Grupo Inmobiliario Castrejón Rodríguez";
 const slogan = "Tu inversión segura con la seriedad que nos distingue";
@@ -218,13 +220,15 @@ function StickyHero() {
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,rgba(204,164,88,0.22),transparent_32%),linear-gradient(115deg,rgba(3,10,22,0.95)_0%,rgba(3,10,22,0.72)_42%,rgba(3,10,22,0.5)_100%)]" />
         <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 py-5 text-sm text-white/80 sm:px-10">
-          <a href="#inicio" className="group flex items-center gap-3">
-            <span className="grid size-10 place-items-center border border-[#d7b56d]/60 bg-white/[0.06] text-[13px] font-semibold text-[#f3d99a] backdrop-blur">
-              CBR
-            </span>
-            <span className="hidden max-w-56 leading-tight sm:block">
-              Grupo Inmobiliario Castrejón Rodríguez
-            </span>
+          <a href="#inicio" className="block w-32 sm:w-44" aria-label={brand}>
+            <Image
+              src="/brand/CBR-LOGO.webp"
+              alt={brand}
+              width={900}
+              height={600}
+              priority
+              className="h-auto w-full object-contain drop-shadow-[0_18px_45px_rgba(216,184,111,0.24)]"
+            />
           </a>
           <a
             href="#contacto"
@@ -630,6 +634,7 @@ export default function Home() {
       <TrustSection />
       <AdvisorSection />
       <LeadForm />
+      <AdvisorChat />
       <footer className="border-t border-white/10 bg-[#030a16] px-6 py-10 text-white/52 lg:px-10">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
