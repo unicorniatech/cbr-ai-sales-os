@@ -85,6 +85,9 @@ const trustItems = [
   "Pagos claros, enganches definidos y seguimiento formal",
 ];
 
+const heroVideoEndProgress = 0.9;
+const heroVideoSafeTail = 0.12;
+
 function useLenis() {
   useEffect(() => {
     const lenis = new Lenis({
@@ -163,9 +166,11 @@ function StickyHero() {
         video.pause();
       }
 
-      const targetTime = Math.min(duration - 0.05, Math.max(0, nextProgress * duration));
+      const scrubProgress = Math.min(1, Math.max(0, nextProgress / heroVideoEndProgress));
+      const safeDuration = Math.max(0, duration - heroVideoSafeTail);
+      const targetTime = Math.min(safeDuration, scrubProgress * safeDuration);
 
-      if (Math.abs(video.currentTime - targetTime) > 0.015) {
+      if (Math.abs(video.currentTime - targetTime) > 0.01) {
         video.currentTime = targetTime;
       }
 
@@ -190,7 +195,7 @@ function StickyHero() {
   }, [scrollYProgress]);
 
   return (
-    <section ref={ref} className="relative h-[320vh]">
+    <section ref={ref} className="relative h-[260vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
         <motion.video
           ref={videoRef}
