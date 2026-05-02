@@ -87,15 +87,16 @@ const trustItems = [
   "Pagos claros, enganches definidos y seguimiento formal",
 ];
 
-const heroVideoEndProgress = 0.9;
-const heroVideoSafeTail = 0.12;
+const heroVideoEndProgress = 0.95;
+const heroVideoSafeTail = 0.08;
 
 function useLenis() {
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.095,
-      wheelMultiplier: 0.98,
-      touchMultiplier: 1.35,
+      lerp: 0.12,
+      wheelMultiplier: 1.2,
+      touchMultiplier: 1.5,
+      smoothWheel: true,
     });
 
     let frame = 0;
@@ -152,52 +153,28 @@ function StickyHero() {
   const ctaY = useTransform(scrollYProgress, [0.86, 0.89], [16, 0]);
 
   useEffect(() => {
-    let animationFrame = 0;
-    let nextProgress = scrollYProgress.get();
+    const video = videoRef.current;
+    if (!video) return;
 
-    const syncVideo = () => {
-      const video = videoRef.current;
-      const duration = videoDurationRef.current || video?.duration || 0;
+    const unsubscribe = scrollYProgress.on("change", (latest: number) => {
+      const duration = videoDurationRef.current || video.duration || 0;
+      if (!videoReadyRef.current || !Number.isFinite(duration) || duration <= 0) return;
 
-      if (!video || !videoReadyRef.current || !Number.isFinite(duration) || duration <= 0) {
-        animationFrame = 0;
-        return;
-      }
-
-      if (!video.paused) {
-        video.pause();
-      }
-
-      const scrubProgress = Math.min(1, Math.max(0, nextProgress / heroVideoEndProgress));
+      const scrubProgress = Math.min(1, Math.max(0, latest / heroVideoEndProgress));
       const safeDuration = Math.max(0, duration - heroVideoSafeTail);
       const targetTime = Math.min(safeDuration, scrubProgress * safeDuration);
 
-      if (Math.abs(video.currentTime - targetTime) > 0.01) {
+      // Only update if difference is significant (reduces jitter)
+      if (Math.abs(video.currentTime - targetTime) > 0.05) {
         video.currentTime = targetTime;
-      }
-
-      animationFrame = 0;
-    };
-
-    const unsubscribe = scrollYProgress.on("change", (latest) => {
-      nextProgress = latest;
-
-      if (!animationFrame) {
-        animationFrame = requestAnimationFrame(syncVideo);
       }
     });
 
-    return () => {
-      unsubscribe();
-
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-      }
-    };
+    return () => unsubscribe();
   }, [scrollYProgress]);
 
   return (
-    <section ref={ref} className="relative h-[260vh]">
+    <section ref={ref} className="relative h-[180vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
         <motion.video
           ref={videoRef}
@@ -207,14 +184,14 @@ function StickyHero() {
           muted
           playsInline
           preload="auto"
-          onLoadedMetadata={(event) => {
+          onLoadedMetadata={(event: React.SyntheticEvent<HTMLVideoElement>) => {
             const video = event.currentTarget;
             videoDurationRef.current = video.duration;
             videoReadyRef.current = true;
             video.pause();
             video.currentTime = 0;
           }}
-          onPlay={(event) => {
+          onPlay={(event: React.SyntheticEvent<HTMLVideoElement>) => {
             event.currentTarget.pause();
           }}
         />
@@ -239,7 +216,7 @@ function StickyHero() {
           </a>
         </div>
 
-        <HeroText progress={scrollYProgress} range={[0.015, 0.045, 0.19, 0.22]}>
+        <HeroText progress={scrollYProgress} range={[0.02, 0.06, 0.22, 0.28]}>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.42em] text-[#f3d99a]">
             Morelos real estate
           </p>
@@ -247,17 +224,17 @@ function StickyHero() {
             {storySteps[0]}
           </h1>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.24, 0.27, 0.41, 0.44]}>
+        <HeroText progress={scrollYProgress} range={[0.32, 0.38, 0.52, 0.58]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[1]}
           </h2>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.465, 0.495, 0.635, 0.665]}>
+        <HeroText progress={scrollYProgress} range={[0.62, 0.68, 0.78, 0.84]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[2]}
           </h2>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.69, 0.72, 0.855, 0.885]}>
+        <HeroText progress={scrollYProgress} range={[0.88, 0.92, 0.97, 0.995]}>
           <p className="mx-auto mb-5 max-w-2xl text-base uppercase tracking-[0.36em] text-[#f3d99a]/90">
             {slogan}
           </p>
@@ -268,7 +245,7 @@ function StickyHero() {
 
         <motion.div
           style={{ opacity: ctaOpacity, y: ctaY }}
-          className="absolute inset-x-0 bottom-14 z-20 flex flex-col items-center justify-center gap-3 px-6 sm:flex-row"
+          className="absolute inset-x-0 bottom-10 z-20 flex flex-col items-center justify-center gap-3 px-6 sm:flex-row"
         >
           <a
             href="#propiedades"
