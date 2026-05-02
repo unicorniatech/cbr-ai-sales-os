@@ -134,6 +134,8 @@ function HeroText({
 
 function StickyHero() {
   const ref = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoDurationRef = useRef(0);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
@@ -143,18 +145,40 @@ function StickyHero() {
   const ctaOpacity = useTransform(scrollYProgress, [0.78, 0.9], [0, 1]);
   const ctaY = useTransform(scrollYProgress, [0.78, 0.9], [22, 0]);
 
+  useEffect(() => {
+    return scrollYProgress.on("change", (latest) => {
+      const video = videoRef.current;
+      const duration = videoDurationRef.current || video?.duration || 0;
+
+      if (!video || !Number.isFinite(duration) || duration <= 0) {
+        return;
+      }
+
+      const targetTime = Math.min(duration - 0.05, Math.max(0, latest * duration));
+
+      if (Math.abs(video.currentTime - targetTime) > 0.035) {
+        video.currentTime = targetTime;
+      }
+    });
+  }, [scrollYProgress]);
+
   return (
     <section ref={ref} className="relative h-[560vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
         <motion.video
+          ref={videoRef}
           style={{ scale: videoScale, opacity: videoOpacity }}
           className="absolute inset-0 h-full w-full object-cover"
           src="/videos/CBR-introvideo.mp4"
-          autoPlay
           muted
-          loop
           playsInline
-          preload="metadata"
+          preload="auto"
+          onLoadedMetadata={(event) => {
+            const video = event.currentTarget;
+            videoDurationRef.current = video.duration;
+            video.pause();
+            video.currentTime = 0;
+          }}
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,rgba(204,164,88,0.22),transparent_32%),linear-gradient(115deg,rgba(3,10,22,0.95)_0%,rgba(3,10,22,0.72)_42%,rgba(3,10,22,0.5)_100%)]" />
         <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 py-5 text-sm text-white/80 sm:px-10">
