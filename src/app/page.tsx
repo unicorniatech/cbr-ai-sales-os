@@ -136,29 +136,82 @@ function HeroText({
 
 function StickyHero() {
   const ref = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoDurationRef = useRef(0);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
   });
-  const mediaScale = useTransform(scrollYProgress, [0, 0.65, 1], [1.035, 1.012, 1]);
-  const mediaOpacity = useTransform(scrollYProgress, [0, 0.84, 1], [1, 1, 0.58]);
-  const logoOpacity = useTransform(scrollYProgress, [0, 0.025, 0.15, 0.2], [0, 1, 1, 0]);
-  const logoY = useTransform(scrollYProgress, [0, 0.025, 0.2], [18, 0, -18]);
-  const logoScale = useTransform(scrollYProgress, [0, 0.025, 0.2], [0.98, 1, 0.985]);
-  const scrollCueOpacity = useTransform(scrollYProgress, [0, 0.04, 0.22, 0.3], [0, 1, 1, 0]);
-  const ctaOpacity = useTransform(scrollYProgress, [0.78, 0.82], [0, 1]);
-  const ctaY = useTransform(scrollYProgress, [0.78, 0.82], [14, 0]);
+  const mediaScale = useTransform(scrollYProgress, [0, 0.66, 1], [1.045, 1.016, 1]);
+  const mediaOpacity = useTransform(scrollYProgress, [0, 0.86, 1], [1, 1, 0.56]);
+  const logoOpacity = useTransform(scrollYProgress, [0, 0.03, 0.2, 0.25], [0, 1, 1, 0]);
+  const logoY = useTransform(scrollYProgress, [0, 0.03, 0.25], [20, 0, -20]);
+  const logoScale = useTransform(scrollYProgress, [0, 0.03, 0.25], [0.97, 1, 0.985]);
+  const videoOpacity = useTransform(scrollYProgress, [0.18, 0.27], [0, 1]);
+  const scrollCueOpacity = useTransform(scrollYProgress, [0, 0.04, 0.2, 0.3], [0, 1, 1, 0]);
+  const ctaOpacity = useTransform(scrollYProgress, [0.82, 0.86], [0, 1]);
+  const ctaY = useTransform(scrollYProgress, [0.82, 0.86], [14, 0]);
+
+  useEffect(() => {
+    let animationFrame = 0;
+    let nextProgress = scrollYProgress.get();
+
+    const syncVideo = () => {
+      const video = videoRef.current;
+      const duration = videoDurationRef.current || video?.duration || 0;
+
+      if (video && Number.isFinite(duration) && duration > 0) {
+        const storyProgress = Math.min(1, Math.max(0, (nextProgress - 0.22) / 0.72));
+        const targetTime = Math.min(duration - 0.04, storyProgress * (duration - 0.04));
+
+        if (Math.abs(video.currentTime - targetTime) > 0.035) {
+          video.currentTime = targetTime;
+        }
+      }
+
+      animationFrame = 0;
+    };
+
+    const unsubscribe = scrollYProgress.on("change", (latest) => {
+      nextProgress = latest;
+
+      if (!animationFrame) {
+        animationFrame = requestAnimationFrame(syncVideo);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [scrollYProgress]);
 
   return (
-    <section ref={ref} className="relative h-[330vh]">
+    <section ref={ref} className="relative h-[390vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
         <motion.div
           style={{ scale: mediaScale, opacity: mediaOpacity }}
-          className="absolute inset-0 bg-cover bg-center sm:bg-[center_42%]"
+          className="absolute inset-0 bg-[url('/videos/CBR-intro.webp')] bg-cover bg-center sm:bg-[center_42%]"
           aria-hidden="true"
-        >
-          <div className="h-full w-full bg-[url('/videos/CBR-intro.webp')] bg-cover bg-center sm:bg-[center_42%]" />
-        </motion.div>
+        />
+        <motion.video
+          ref={videoRef}
+          style={{ scale: mediaScale, opacity: videoOpacity }}
+          className="absolute inset-0 h-full w-full object-cover object-center sm:object-[center_42%]"
+          src="/videos/CBR-intro-scroll.mp4"
+          muted
+          playsInline
+          preload="auto"
+          onLoadedMetadata={(event) => {
+            const video = event.currentTarget;
+            videoDurationRef.current = video.duration;
+            video.pause();
+            video.currentTime = 0;
+          }}
+        />
         <div
           className="absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(216,184,111,0.18),transparent_30%),linear-gradient(115deg,rgba(3,10,22,0.94)_0%,rgba(3,10,22,0.74)_48%,rgba(3,10,22,0.54)_100%)]"
           aria-hidden="true"
@@ -183,7 +236,7 @@ function StickyHero() {
 
         <motion.div
           style={{ opacity: logoOpacity, y: logoY, scale: logoScale }}
-          className="absolute inset-x-0 top-[15vh] z-10 mx-auto w-[min(76vw,520px)] px-6 sm:top-[12vh]"
+          className="absolute inset-x-0 top-1/2 z-10 mx-auto w-[min(86vw,640px)] -translate-y-1/2 px-5"
         >
           <Image
             src="/brand/CBR-LOGO.webp"
@@ -195,7 +248,7 @@ function StickyHero() {
           />
         </motion.div>
 
-        <HeroText progress={scrollYProgress} range={[0.16, 0.2, 0.3, 0.33]}>
+        <HeroText progress={scrollYProgress} range={[0.27, 0.31, 0.41, 0.44]}>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.42em] text-[#f3d99a]">
             Morelos real estate
           </p>
@@ -203,17 +256,17 @@ function StickyHero() {
             {storySteps[0]}
           </h1>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.36, 0.4, 0.5, 0.53]}>
+        <HeroText progress={scrollYProgress} range={[0.47, 0.51, 0.61, 0.64]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[1]}
           </h2>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.56, 0.6, 0.7, 0.73]}>
+        <HeroText progress={scrollYProgress} range={[0.66, 0.7, 0.78, 0.81]}>
           <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl lg:text-7xl">
             {storySteps[2]}
           </h2>
         </HeroText>
-        <HeroText progress={scrollYProgress} range={[0.76, 0.8, 0.9, 0.93]}>
+        <HeroText progress={scrollYProgress} range={[0.83, 0.87, 0.94, 0.98]}>
           <p className="mx-auto mb-5 max-w-2xl text-base uppercase tracking-[0.36em] text-[#f3d99a]/90">
             {slogan}
           </p>
