@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   Bot,
   Calculator,
   CheckCircle,
+  ChevronDown,
   FileText,
   MessageCircle,
   Send,
+  Sparkles,
   UserRound,
   X,
 } from "lucide-react";
@@ -23,6 +25,7 @@ type ChatMessage = {
   role: Role;
   text: string;
   kind?: MessageKind;
+  timestamp?: string;
 };
 
 const projectFacts = {
@@ -215,166 +218,330 @@ function PaymentCalculatorCard() {
   );
 }
 
+function TypingIndicator() {
+  return (
+    <div className="flex gap-1 px-1">
+      <motion.span
+        className="size-1.5 rounded-full bg-[#d8b86f]"
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+      />
+      <motion.span
+        className="size-1.5 rounded-full bg-[#d8b86f]"
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
+      />
+      <motion.span
+        className="size-1.5 rounded-full bg-[#d8b86f]"
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+      />
+    </div>
+  );
+}
+
+function MessageBubble({ message, isLast }: { message: ChatMessage; isLast: boolean }) {
+  const isVisitor = message.role === "visitor";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className={`flex gap-3 ${isVisitor ? "justify-end" : "justify-start"}`}
+    >
+      {!isVisitor && (
+        <motion.span
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="mt-1 grid size-8 shrink-0 place-items-center rounded-lg border border-[#d8b86f]/40 bg-gradient-to-br from-[#d8b86f]/20 to-[#d8b86f]/5 text-[#f3d99a]"
+        >
+          <Bot size={14} />
+        </motion.span>
+      )}
+
+      <div className={`max-w-[85%] space-y-1 ${isVisitor ? "items-end" : "items-start"}`}>
+        <div
+          className={`relative px-4 py-3 text-sm leading-relaxed shadow-lg ${
+            isVisitor
+              ? "rounded-2xl rounded-tr-sm bg-gradient-to-br from-[#d8b86f] to-[#c4a55a] text-[#07111f]"
+              : "rounded-2xl rounded-tl-sm border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.03] text-white/90 backdrop-blur-sm"
+          }`}
+        >
+          <p className={message.kind ? "mb-2" : ""}>{message.text}</p>
+
+          {message.kind === "lead-form" && (
+            <LeadCaptureMiniForm onSuccess={() => {}} />
+          )}
+          {message.kind === "calculator" && <PaymentCalculatorCard />}
+        </div>
+
+        <span className={`text-[10px] text-white/40 ${isVisitor ? "text-right" : "text-left"} block`}>
+          {message.timestamp}
+        </span>
+      </div>
+
+      {isVisitor && (
+        <motion.span
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="mt-1 grid size-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.06] text-white/60"
+        >
+          <UserRound size={14} />
+        </motion.span>
+      )}
+    </motion.div>
+  );
+}
+
 export function AdvisorChat() {
   const nextIdRef = useRef(2);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
       role: "advisor",
-      text: "Hola, soy el asesor IA de CBR. Puedo orientarte sobre precios, ubicacion, medidas, documentacion y tomar tus datos.",
+      text: "¡Hola! Soy tu asesor virtual de CBR. ¿En qué puedo ayudarte hoy?\n\nTe puedo orientar sobre:",
+      timestamp: new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
-  const unreadLabel = useMemo(() => (isOpen ? "Cerrar asesor IA" : "Abrir asesor IA"), [isOpen]);
+  const unreadLabel = useMemo(() => (isOpen ? "Cerrar chat" : "Abrir asesor IA"), [isOpen]);
 
-  const sendMessage = (value: string) => {
-    const cleanValue = value.trim();
-
-    if (!cleanValue) {
-      return;
+  // Auto-scroll to bottom
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+  }, [messages, isTyping]);
 
-    const visitorId = nextIdRef.current;
-    nextIdRef.current += 1;
-    const advisorId = nextIdRef.current;
-    nextIdRef.current += 1;
+  const sendMessage = async (value: string) => {
+    const cleanValue = value.trim();
+    if (!cleanValue) return;
 
+    setHasInteracted(true);
+    const timestamp = new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+
+    const visitorId = nextIdRef.current++;
     const visitorMessage: ChatMessage = {
       id: visitorId,
       role: "visitor",
       text: cleanValue,
+      timestamp,
     };
 
-    setMessages((current) => [
-      ...current,
-      visitorMessage,
-      getAdvisorReply(cleanValue, advisorId),
-    ]);
+    setMessages((current) => [...current, visitorMessage]);
     setInput("");
+
+    // Simulate typing
+    setIsTyping(true);
+    await new Promise((resolve) => setTimeout(resolve, 600 + Math.random() * 400));
+    setIsTyping(false);
+
+    const advisorId = nextIdRef.current++;
+    const reply = getAdvisorReply(cleanValue, advisorId);
+    reply.timestamp = new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+
+    setMessages((current) => [...current, reply]);
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50">
-      {isOpen ? (
-        <motion.div
-          initial={{ opacity: 0, y: 18, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 12, scale: 0.98 }}
-          className="mb-4 flex h-[min(680px,calc(100vh-120px))] w-[min(420px,calc(100vw-40px))] flex-col overflow-hidden border border-white/14 bg-[#030a16]/96 shadow-2xl shadow-black/40 backdrop-blur-xl"
-        >
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center border border-[#d8b86f]/45 bg-[#d8b86f]/10 text-[#f3d99a]">
-                <Bot size={20} />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-white">Asesor IA CBR</p>
-                <p className="text-xs text-white/48">KB local + funciones demo</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              aria-label="Cerrar asesor IA"
-              onClick={() => setIsOpen(false)}
-              className="grid size-9 place-items-center border border-white/10 text-white/70 transition hover:border-[#d8b86f]/60 hover:text-[#f3d99a]"
-            >
-              <X size={18} />
-            </button>
-          </div>
+    <div className="fixed bottom-6 right-6 z-50">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="mb-4 flex h-[min(600px,calc(100vh-140px))] w-[min(400px,calc(100vw-48px))] flex-col overflow-hidden rounded-2xl border border-white/20 bg-[#030a16]/98 shadow-2xl shadow-black/50 backdrop-blur-xl"
+          >
+            {/* Header */}
+            <div className="relative flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#030a16] to-[#07111f] px-5 py-4">
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#d8b86f] via-[#f3d99a] to-[#d8b86f]" />
 
-          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${message.role === "visitor" ? "justify-end" : "justify-start"}`}
-              >
-                {message.role === "advisor" ? (
-                  <span className="mt-1 grid size-7 shrink-0 place-items-center border border-[#d8b86f]/35 bg-[#d8b86f]/10 text-[#f3d99a]">
-                    <Bot size={14} />
-                  </span>
-                ) : null}
-                <div
-                  className={`max-w-[82%] px-4 py-3 text-sm leading-6 ${
-                    message.role === "visitor"
-                      ? "bg-[#d8b86f] text-[#07111f]"
-                      : "border border-white/10 bg-white/[0.055] text-white/78"
-                  }`}
-                >
-                  <p>{message.text}</p>
-                  {message.kind === "lead-form" ? (
-                    <LeadCaptureMiniForm onSuccess={() => {
-                      sendMessage("Listo, mis datos están guardados.");
-                    }} />
-                  ) : null}
-                  {message.kind === "calculator" ? <PaymentCalculatorCard /> : null}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <motion.span
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, repeatDelay: 5 }}
+                    className="grid size-10 place-items-center rounded-xl border border-[#d8b86f]/40 bg-gradient-to-br from-[#d8b86f]/25 to-[#d8b86f]/5 text-[#f3d99a]"
+                  >
+                    <Sparkles size={18} />
+                  </motion.span>
+                  <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[#030a16] bg-green-500" />
                 </div>
-                {message.role === "visitor" ? (
-                  <span className="mt-1 grid size-7 shrink-0 place-items-center border border-white/10 bg-white/[0.06] text-white/70">
-                    <UserRound size={14} />
-                  </span>
-                ) : null}
+                <div>
+                  <p className="text-sm font-semibold text-white">Asesor IA CBR</p>
+                  <div className="flex items-center gap-1.5 text-xs text-white/50">
+                    <span className="size-1.5 rounded-full bg-green-500" />
+                    En línea
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
 
-          <div className="border-t border-white/10 p-4">
-            <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-              {quickActions.map((action) => (
-                <button
-                  key={action.label}
-                  type="button"
-                  onClick={() => sendMessage(action.prompt)}
-                  className="shrink-0 border border-white/10 bg-white/[0.05] px-3 py-2 text-xs text-white/70 transition hover:border-[#d8b86f]/60 hover:text-[#f3d99a]"
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <input
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    sendMessage(input);
-                  }
-                }}
-                className="min-h-11 flex-1 border border-white/10 bg-[#06111f] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#d8b86f]"
-                placeholder="Pregunta sobre el proyecto..."
-              />
               <button
                 type="button"
-                onClick={() => sendMessage(input)}
-                className="grid size-11 place-items-center bg-[#d8b86f] text-[#07111f] transition hover:bg-[#f3d99a]"
-                aria-label="Enviar mensaje"
+                aria-label="Cerrar asesor IA"
+                onClick={() => setIsOpen(false)}
+                className="grid size-9 place-items-center rounded-lg border border-white/10 text-white/50 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white"
               >
-                <Send size={18} />
+                <X size={18} />
               </button>
             </div>
-          </div>
-        </motion.div>
-      ) : null}
 
-      <button
+            {/* Welcome Banner */}
+            {!hasInteracted && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="border-b border-white/5 bg-gradient-to-r from-[#d8b86f]/10 to-transparent px-5 py-3"
+              >
+                <div className="flex flex-wrap gap-2">
+                  {["💰 Precios", "📍 Ubicación", "📋 Documentos", "🧮 Plan de pagos"].map((tag) => (
+                    <span key={tag} className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] text-white/60">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Messages */}
+            <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+              {messages.map((message, index) => (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  isLast={index === messages.length - 1}
+                />
+              ))}
+
+              {isTyping && (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-3"
+                >
+                  <span className="mt-1 grid size-8 place-items-center rounded-lg border border-[#d8b86f]/40 bg-gradient-to-br from-[#d8b86f]/20 to-[#d8b86f]/5 text-[#f3d99a]">
+                    <Bot size={14} />
+                  </span>
+                  <div className="rounded-2xl rounded-tl-sm border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <TypingIndicator />
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="border-t border-white/5 px-4 pt-3">
+              <p className="mb-2 text-[10px] uppercase tracking-wider text-white/30">Sugerencias rápidas</p>
+              <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
+                {quickActions.map((action) => (
+                  <motion.button
+                    key={action.label}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={() => sendMessage(action.prompt)}
+                    disabled={isTyping}
+                    className="shrink-0 rounded-full border border-[#d8b86f]/30 bg-gradient-to-r from-[#d8b86f]/10 to-transparent px-4 py-2 text-xs text-[#f3d99a] transition hover:border-[#d8b86f]/60 hover:from-[#d8b86f]/20 disabled:opacity-50"
+                  >
+                    {action.label}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Input */}
+            <div className="border-t border-white/10 bg-[#030a16]/80 p-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage(input);
+                      }
+                    }}
+                    disabled={isTyping}
+                    className="w-full rounded-xl border border-white/10 bg-[#06111f] py-3 pl-4 pr-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#d8b86f]/60 focus:ring-1 focus:ring-[#d8b86f]/20 disabled:opacity-50"
+                    placeholder="Escribe tu pregunta..."
+                  />
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => sendMessage(input)}
+                  disabled={isTyping || !input.trim()}
+                  className="grid size-11 place-items-center rounded-xl bg-gradient-to-br from-[#d8b86f] to-[#c4a55a] text-[#07111f] shadow-lg shadow-[#d8b86f]/20 transition hover:shadow-xl hover:shadow-[#d8b86f]/30 disabled:opacity-50 disabled:shadow-none"
+                >
+                  <Send size={18} />
+                </motion.button>
+              </div>
+              <p className="mt-2 text-center text-[10px] text-white/25">
+                Powered by CBR AI • Respuestas instantáneas
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toggle Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         type="button"
         aria-label={unreadLabel}
-        onClick={() => setIsOpen((current) => !current)}
-        className="group flex min-h-14 items-center gap-3 bg-[#d8b86f] px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[#07111f] shadow-2xl shadow-black/35 transition hover:bg-[#f3d99a]"
+        onClick={() => setIsOpen((c) => !c)}
+        className="group relative flex min-h-14 items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-r from-[#d8b86f] to-[#c4a55a] px-5 text-sm font-semibold uppercase tracking-[0.14em] text-[#07111f] shadow-2xl shadow-black/40 transition hover:shadow-xl"
       >
-        {isOpen ? <X size={20} /> : <MessageCircle size={20} />}
-        <span className="hidden sm:inline">Asesor IA</span>
-      </button>
+        <motion.span
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {isOpen ? <X size={20} /> : <MessageCircle size={20} />}
+        </motion.span>
+        <span className="hidden sm:inline">{isOpen ? "Cerrar" : "Asesor IA"}</span>
 
-      {!isOpen ? (
-        <div className="pointer-events-none absolute bottom-16 right-0 hidden w-72 border border-white/10 bg-[#030a16]/92 p-3 text-xs leading-5 text-white/62 shadow-xl shadow-black/30 backdrop-blur md:block">
-          <div className="mb-2 flex items-center gap-2 text-[#f3d99a]">
-            <FileText size={14} />
-            <span>Pregunta por precios, ubicacion o documentos.</span>
+        {/* Glow effect */}
+        <span className="absolute inset-0 -z-10 bg-gradient-to-r from-[#f3d99a]/0 via-[#f3d99a]/30 to-[#f3d99a]/0 opacity-0 transition-opacity group-hover:opacity-100" />
+      </motion.button>
+
+      {/* Tooltip */}
+      {!isOpen && !hasInteracted && (
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 2, duration: 0.5 }}
+          className="pointer-events-none absolute bottom-20 right-0 w-64 rounded-xl border border-white/10 bg-[#030a16]/95 p-4 text-sm text-white/70 shadow-2xl shadow-black/30 backdrop-blur-xl"
+        >
+          <div className="absolute -bottom-2 right-6 size-4 rotate-45 border-b border-r border-white/10 bg-[#030a16]" />
+          <div className="flex items-start gap-3">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-[#d8b86f]/20 text-[#f3d99a]">
+              <Sparkles size={14} />
+            </span>
+            <div>
+              <p className="font-medium text-white">¿Tienes preguntas?</p>
+              <p className="mt-1 text-xs text-white/50">Te ayudo con precios, ubicación y más.</p>
+            </div>
           </div>
-        </div>
-      ) : null}
+          <motion.div
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-white/30"
+          >
+            <ChevronDown size={20} />
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }
