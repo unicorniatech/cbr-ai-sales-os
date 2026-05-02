@@ -16,6 +16,7 @@ import {
   Bot,
   CheckCircle2,
   ChevronRight,
+  ChevronDown,
   FileCheck2,
   Home as HomeIcon,
   Landmark,
@@ -151,6 +152,8 @@ function StickyHero() {
   const videoOpacity = useTransform(scrollYProgress, [0, 0.86, 1], [1, 1, 0.5]);
   const ctaOpacity = useTransform(scrollYProgress, [0.86, 0.89], [0, 1]);
   const ctaY = useTransform(scrollYProgress, [0.86, 0.89], [16, 0]);
+  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+  const scrollIndicatorY = useTransform(scrollYProgress, [0, 0.15], [0, 30]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -184,6 +187,8 @@ function StickyHero() {
           muted
           playsInline
           preload="auto"
+          disableRemotePlayback
+          poster="/brand/CBR-LOGO.webp"
           onLoadedMetadata={(event: React.SyntheticEvent<HTMLVideoElement>) => {
             const video = event.currentTarget;
             videoDurationRef.current = video.duration;
@@ -242,6 +247,21 @@ function StickyHero() {
             {storySteps[3]}
           </h2>
         </HeroText>
+
+        {/* Scroll Down Indicator - appears at start, fades on scroll */}
+        <motion.div
+          style={{ opacity: scrollIndicatorOpacity, y: scrollIndicatorY }}
+          className="absolute inset-x-0 bottom-28 z-20 flex flex-col items-center gap-2 px-6"
+        >
+          <span className="text-xs uppercase tracking-[0.3em] text-white/60">Desplaza</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="grid size-10 place-items-center border border-white/20 bg-white/[0.08] text-[#d8b86f] backdrop-blur"
+          >
+            <ChevronDown size={20} />
+          </motion.div>
+        </motion.div>
 
         <motion.div
           style={{ opacity: ctaOpacity, y: ctaY }}
