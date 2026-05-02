@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import {
   AnimatePresence,
@@ -27,6 +27,7 @@ import {
   Trees,
 } from "lucide-react";
 import { AdvisorChat } from "./components/advisor-chat";
+import { captureLead } from "./lib/lead-store";
 
 const brand = "Grupo Inmobiliario Castrejón Rodríguez";
 const slogan = "Tu inversión segura con la seriedad que nos distingue";
@@ -549,6 +550,49 @@ function LeadForm() {
     () => ["Terreno", "Casa", "Inversión", "Cumbres de Bendición"],
     [],
   );
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [interest, setInterest] = useState(interestOptions[0]);
+  const [message, setMessage] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !phone.trim()) return;
+
+    setIsSubmitting(true);
+    captureLead({
+      name,
+      phone,
+      interest,
+      notes: message,
+      source: "Landing",
+    });
+    setSubmitted(true);
+    setIsSubmitting(false);
+  };
+
+  if (submitted) {
+    return (
+      <section id="contacto" className="bg-[#030a16] py-28 sm:py-36">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <Reveal>
+            <div className="border border-[#d8b86f]/30 bg-[#d8b86f]/10 p-8 text-center backdrop-blur">
+              <BadgeCheck className="mx-auto mb-4 size-12 text-[#d8b86f]" />
+              <h2 className="text-3xl font-semibold text-white">¡Gracias, {name}!</h2>
+              <p className="mt-4 text-lg text-white/70">
+                Hemos recibido tu información. Un asesor te contactará pronto.
+              </p>
+              <p className="mt-2 text-sm text-white/50">
+                También puedes usar el asesor IA en la esquina inferior derecha.
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="contacto" className="bg-[#030a16] py-28 sm:py-36">
@@ -562,52 +606,64 @@ function LeadForm() {
               Agenda una conversación seria sobre tu próxima inversión.
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/66">
-              Este formulario queda listo para conectarse después a Supabase,
-              CRM o al asesor IA. Por ahora entrega una experiencia frontal
-              completa y responsiva.
+              Déjanos tus datos y un asesor te contactará. Los leads se guardan
+              localmente y están listos para conectarse a tu CRM o Supabase.
             </p>
           </div>
         </Reveal>
         <Reveal delay={0.1}>
-          <form className="space-y-5 border border-white/12 bg-white/[0.04] p-6 backdrop-blur sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-5 border border-white/12 bg-white/[0.04] p-6 backdrop-blur sm:p-8">
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="space-y-2 text-sm text-white/68">
-                Nombre
+                Nombre *
                 <input
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="min-h-12 w-full border border-white/12 bg-[#071321] px-4 text-white outline-none transition placeholder:text-white/32 focus:border-[#d8b86f]"
                   placeholder="Tu nombre"
                   type="text"
                 />
               </label>
               <label className="space-y-2 text-sm text-white/68">
-                Telefono
+                WhatsApp *
                 <input
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   className="min-h-12 w-full border border-white/12 bg-[#071321] px-4 text-white outline-none transition placeholder:text-white/32 focus:border-[#d8b86f]"
-                  placeholder="WhatsApp"
+                  placeholder="Tu número"
                   type="tel"
                 />
               </label>
             </div>
             <label className="space-y-2 text-sm text-white/68">
               Interés principal
-              <select className="min-h-12 w-full border border-white/12 bg-[#071321] px-4 text-white outline-none transition focus:border-[#d8b86f]">
+              <select
+                value={interest}
+                onChange={(e) => setInterest(e.target.value)}
+                className="min-h-12 w-full border border-white/12 bg-[#071321] px-4 text-white outline-none transition focus:border-[#d8b86f]"
+              >
                 {interestOptions.map((option) => (
                   <option key={option}>{option}</option>
                 ))}
               </select>
             </label>
             <label className="space-y-2 text-sm text-white/68">
-              Mensaje
+              Mensaje (opcional)
               <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 className="min-h-32 w-full resize-none border border-white/12 bg-[#071321] px-4 py-3 text-white outline-none transition placeholder:text-white/32 focus:border-[#d8b86f]"
                 placeholder="Cuéntanos qué estás buscando"
               />
             </label>
             <button
-              type="button"
-              className="inline-flex min-h-12 w-full items-center justify-center gap-3 bg-[#d8b86f] px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#07111f] transition hover:bg-[#f3d99a]"
+              type="submit"
+              disabled={isSubmitting || !name.trim() || !phone.trim()}
+              className="inline-flex min-h-12 w-full items-center justify-center gap-3 bg-[#d8b86f] px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#07111f] transition hover:bg-[#f3d99a] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Solicitar asesoría
+              {isSubmitting ? "Enviando..." : "Solicitar asesoría"}
               <MessageCircle size={18} aria-hidden="true" />
             </button>
           </form>

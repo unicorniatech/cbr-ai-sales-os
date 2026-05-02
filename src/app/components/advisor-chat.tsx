@@ -6,12 +6,14 @@ import {
   ArrowRight,
   Bot,
   Calculator,
+  CheckCircle,
   FileText,
   MessageCircle,
   Send,
   UserRound,
   X,
 } from "lucide-react";
+import { captureLead } from "../lib/lead-store";
 
 type Role = "advisor" | "visitor";
 type MessageKind = "text" | "lead-form" | "calculator";
@@ -115,27 +117,66 @@ function getAdvisorReply(input: string, id: number): ChatMessage {
   };
 }
 
-function LeadCaptureMiniForm() {
+function LeadCaptureMiniForm({ onSuccess }: { onSuccess: () => void }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [interest, setInterest] = useState("Cumbres de Bendición");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !phone.trim()) return;
+
+    captureLead({
+      name,
+      phone,
+      interest,
+      source: "Asesor IA",
+    });
+    setSubmitted(true);
+    setTimeout(onSuccess, 2000);
+  };
+
+  if (submitted) {
+    return (
+      <div className="mt-3 border border-[#d8b86f]/30 bg-[#d8b86f]/10 p-3 text-center">
+        <CheckCircle className="mx-auto mb-2 size-6 text-[#d8b86f]" />
+        <p className="text-sm text-white">¡Listo! Te contactaremos pronto.</p>
+      </div>
+    );
+  }
+
   return (
-    <form className="mt-3 grid gap-3 border border-white/10 bg-[#06111f] p-3">
+    <form onSubmit={handleSubmit} className="mt-3 grid gap-3 border border-white/10 bg-[#06111f] p-3">
       <input
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
         className="min-h-10 border border-white/10 bg-[#030a16] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#d8b86f]"
-        placeholder="Nombre"
+        placeholder="Nombre *"
       />
       <input
+        required
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
         className="min-h-10 border border-white/10 bg-[#030a16] px-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#d8b86f]"
-        placeholder="WhatsApp"
+        placeholder="WhatsApp *"
         type="tel"
       />
-      <select className="min-h-10 border border-white/10 bg-[#030a16] px-3 text-sm text-white outline-none focus:border-[#d8b86f]">
+      <select
+        value={interest}
+        onChange={(e) => setInterest(e.target.value)}
+        className="min-h-10 border border-white/10 bg-[#030a16] px-3 text-sm text-white outline-none focus:border-[#d8b86f]"
+      >
         <option>Cumbres de Bendición</option>
         <option>Terreno</option>
         <option>Casa</option>
         <option>Inversión</option>
       </select>
       <button
-        type="button"
-        className="inline-flex min-h-10 items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#07111f]"
+        type="submit"
+        disabled={!name.trim() || !phone.trim()}
+        className="inline-flex min-h-10 items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#07111f] disabled:opacity-50"
       >
         Preparar seguimiento
         <ArrowRight size={14} />
@@ -262,7 +303,11 @@ export function AdvisorChat() {
                   }`}
                 >
                   <p>{message.text}</p>
-                  {message.kind === "lead-form" ? <LeadCaptureMiniForm /> : null}
+                  {message.kind === "lead-form" ? (
+                    <LeadCaptureMiniForm onSuccess={() => {
+                      sendMessage("Listo, mis datos están guardados.");
+                    }} />
+                  ) : null}
                   {message.kind === "calculator" ? <PaymentCalculatorCard /> : null}
                 </div>
                 {message.role === "visitor" ? (

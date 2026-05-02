@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowDownRight,
@@ -17,6 +17,7 @@ import {
   ListFilter,
   MessageCircle,
   Phone,
+  RefreshCw,
   Search,
   Settings,
   ShieldCheck,
@@ -24,6 +25,7 @@ import {
   Sparkles,
   UsersRound,
 } from "lucide-react";
+import { getAllLeads, type StoredLead } from "../lib/lead-store";
 
 type LeadTemperature = "hot" | "warm" | "cold";
 type LeadStage = "Nuevo" | "Contactado" | "Calificado" | "Visita" | "Apartado";
@@ -652,13 +654,28 @@ function TasksView() {
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [selectedLeadId, setSelectedLeadId] = useState(leads[0].id);
+  const [capturedLeads, setCapturedLeads] = useState<StoredLead[]>([]);
 
-  const hotLeads = leads.filter((lead) => lead.temperature === "hot").length;
-  const coldLeads = leads.filter((lead) => lead.temperature === "cold").length;
-  const expectedPipeline = leads.reduce((sum, lead) => {
+  // Load captured leads from localStorage
+  useEffect(() => {
+    setCapturedLeads(getAllLeads());
+  }, []);
+
+  // Combine mock leads with captured leads
+  const allLeads = useMemo(() => {
+    return [...capturedLeads, ...leads];
+  }, [capturedLeads]);
+
+  const hotLeads = allLeads.filter((lead) => lead.temperature === "hot").length;
+  const coldLeads = allLeads.filter((lead) => lead.temperature === "cold").length;
+  const expectedPipeline = allLeads.reduce((sum, lead) => {
     const value = lead.budget.includes("95") ? 95000 : lead.budget.includes("85") ? 85000 : 0;
     return sum + value;
   }, 0);
+
+  const refreshLeads = () => {
+    setCapturedLeads(getAllLeads());
+  };
 
   const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -683,6 +700,18 @@ export default function AdminDashboard() {
           </Link>
 
           <div className="flex items-center gap-3">
+            {capturedLeads.length > 0 && (
+              <span className="hidden text-sm text-white/50 md:inline">
+                +{capturedLeads.length} capturados
+              </span>
+            )}
+            <button
+              onClick={refreshLeads}
+              className="grid size-10 place-items-center border border-white/10 bg-white/[0.045] text-white/68 transition hover:border-[#d8b86f]/55 hover:text-[#f3d99a]"
+              title="Actualizar leads"
+            >
+              <RefreshCw size={18} />
+            </button>
             <button className="hidden min-h-10 items-center gap-2 border border-white/10 bg-white/[0.045] px-4 text-xs uppercase tracking-[0.18em] text-white/68 transition hover:border-[#d8b86f]/55 hover:text-[#f3d99a] sm:inline-flex">
               <Bot size={16} />
               Asesor IA activo
@@ -721,7 +750,7 @@ export default function AdminDashboard() {
       <div className="mx-auto max-w-[1600px] p-5 lg:p-8">
         {activeTab === "dashboard" && (
           <DashboardView
-            leads={leads}
+            leads={allLeads}
             hotLeads={hotLeads}
             coldLeads={coldLeads}
             expectedPipeline={expectedPipeline}
@@ -733,9 +762,9 @@ export default function AdminDashboard() {
           />
         )}
         {activeTab === "leads" && (
-          <LeadsView leads={leads} selectedLeadId={selectedLeadId} onSelectLead={setSelectedLeadId} />
+          <LeadsView leads={allLeads} selectedLeadId={selectedLeadId} onSelectLead={setSelectedLeadId} />
         )}
-        {activeTab === "pipeline" && <PipelineView leads={leads} />}
+        {activeTab === "pipeline" && <PipelineView leads={allLeads} />}
         {activeTab === "tasks" && <TasksView />}
       </div>
     </main>
