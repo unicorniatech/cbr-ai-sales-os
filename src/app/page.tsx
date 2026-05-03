@@ -92,6 +92,13 @@ const trustItems = [
 const heroVideoEndProgress = 0.95;
 const heroVideoSafeTail = 0.08;
 
+function getHeroVideoTargetTime(progress: number, duration: number) {
+  const scrubProgress = Math.min(1, Math.max(0, progress / heroVideoEndProgress));
+  const safeDuration = Math.max(0, duration - heroVideoSafeTail);
+
+  return Math.min(safeDuration, scrubProgress * safeDuration);
+}
+
 function useLenis() {
   useEffect(() => {
     const lenis = new Lenis({
@@ -145,6 +152,7 @@ function StickyHero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoDurationRef = useRef(0);
   const videoReadyRef = useRef(false);
+  const mobileVideoPreparedRef = useRef(false);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
@@ -164,9 +172,11 @@ function StickyHero() {
       const duration = videoDurationRef.current || video.duration || 0;
       if (!videoReadyRef.current || !Number.isFinite(duration) || duration <= 0) return;
 
-      const scrubProgress = Math.min(1, Math.max(0, latest / heroVideoEndProgress));
-      const safeDuration = Math.max(0, duration - heroVideoSafeTail);
-      const targetTime = Math.min(safeDuration, scrubProgress * safeDuration);
+      if (!video.paused) {
+        video.pause();
+      }
+
+      const targetTime = getHeroVideoTargetTime(latest, duration);
 
       // Only update if difference is significant (reduces jitter)
       if (Math.abs(video.currentTime - targetTime) > 0.05) {
@@ -177,9 +187,64 @@ function StickyHero() {
     return () => unsubscribe();
   }, [scrollYProgress]);
 
+  useEffect(() => {
+    const prepareMobileVideo = () => {
+      const video = videoRef.current;
+
+      if (!video || mobileVideoPreparedRef.current) {
+        return;
+      }
+
+      mobileVideoPreparedRef.current = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.load();
+
+      const playAttempt = video.play();
+
+      if (playAttempt) {
+        playAttempt
+          .then(() => {
+            video.pause();
+            video.currentTime = getHeroVideoTargetTime(
+              scrollYProgress.get(),
+              videoDurationRef.current || video.duration || 0,
+            );
+          })
+          .catch(() => {
+            video.pause();
+          });
+      }
+    };
+
+    window.addEventListener("touchstart", prepareMobileVideo, {
+      once: true,
+      passive: true,
+    });
+    window.addEventListener("pointerdown", prepareMobileVideo, {
+      once: true,
+      passive: true,
+    });
+    window.addEventListener("scroll", prepareMobileVideo, {
+      once: true,
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("touchstart", prepareMobileVideo);
+      window.removeEventListener("pointerdown", prepareMobileVideo);
+      window.removeEventListener("scroll", prepareMobileVideo);
+    };
+  }, [scrollYProgress]);
+
   return (
-    <section ref={ref} className="relative h-[180vh]">
-      <div className="sticky top-0 h-screen overflow-hidden bg-[#030a16]">
+    <section ref={ref} className="relative h-[180svh] md:h-[180vh]">
+      <div className="sticky top-0 h-[100svh] overflow-hidden bg-[#030a16] md:h-screen">
+        <motion.div
+          style={{ scale: videoScale, opacity: videoOpacity }}
+          className="absolute inset-0 bg-[url('/videos/CBR-intro-poster.jpg')] bg-cover bg-center"
+          aria-hidden="true"
+        />
         <motion.video
           ref={videoRef}
           style={{ scale: videoScale, opacity: videoOpacity }}
@@ -187,15 +252,21 @@ function StickyHero() {
           src="/videos/CBR-introvideo.mp4"
           muted
           playsInline
+          disablePictureInPicture
+          poster="/videos/CBR-intro-poster.jpg"
           preload="auto"
           disableRemotePlayback
-          poster="/brand/CBR-LOGO.webp"
           onLoadedMetadata={(event: React.SyntheticEvent<HTMLVideoElement>) => {
             const video = event.currentTarget;
             videoDurationRef.current = video.duration;
             videoReadyRef.current = true;
             video.pause();
-            video.currentTime = 0;
+            video.currentTime = getHeroVideoTargetTime(scrollYProgress.get(), video.duration);
+          }}
+          onCanPlay={(event) => {
+            const video = event.currentTarget;
+            videoReadyRef.current = true;
+            video.pause();
           }}
           onPlay={(event: React.SyntheticEvent<HTMLVideoElement>) => {
             event.currentTarget.pause();

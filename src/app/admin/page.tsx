@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowDownRight,
@@ -9,8 +9,6 @@ import {
   Bell,
   Bot,
   CalendarClock,
-  CheckCircle2,
-  ChevronRight,
   CircleDollarSign,
   Flame,
   LayoutDashboard,
@@ -654,12 +652,7 @@ function TasksView() {
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [selectedLeadId, setSelectedLeadId] = useState(leads[0].id);
-  const [capturedLeads, setCapturedLeads] = useState<StoredLead[]>([]);
-
-  // Load captured leads from localStorage
-  useEffect(() => {
-    setCapturedLeads(getAllLeads());
-  }, []);
+  const [capturedLeads, setCapturedLeads] = useState<StoredLead[]>(() => getAllLeads());
 
   // Combine mock leads with captured leads
   const allLeads = useMemo(() => {

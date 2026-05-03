@@ -8,7 +8,6 @@ import {
   Calculator,
   CheckCircle,
   ChevronDown,
-  FileText,
   MessageCircle,
   Send,
   Sparkles,
@@ -240,7 +239,7 @@ function TypingIndicator() {
   );
 }
 
-function MessageBubble({ message, isLast }: { message: ChatMessage; isLast: boolean }) {
+function MessageBubble({ message }: { message: ChatMessage }) {
   const isVisitor = message.role === "visitor";
 
   return (
@@ -413,11 +412,10 @@ export function AdvisorChat() {
 
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-              {messages.map((message, index) => (
+              {messages.map((message) => (
                 <MessageBubble
                   key={message.id}
                   message={message}
-                  isLast={index === messages.length - 1}
                 />
               ))}
 
