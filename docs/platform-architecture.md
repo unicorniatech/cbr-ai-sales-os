@@ -13,6 +13,8 @@ CBR is the first tenant, not the whole system.
 - `lead`: a captured prospect with score, temperature, source, stage, and next action.
 - `conversation`: messages between visitor, AI agent, and later human operators.
 - `payment`: reservation, intro fee, savings contribution, or monthly payment.
+- `buyer_portal`: the client-side experience where a buyer saves, learns, plans, pays, and tracks progress toward land and home ownership.
+- `construction_profile`: optional developer or architect variables for house designs, material tiers, budget ranges, and build paths.
 
 ## First Tenant
 
@@ -43,6 +45,11 @@ Cumbres de Bendición
 - `payments`
 - `buyer_profiles`
 - `documents`
+- `savings_goals`
+- `construction_options`
+- `design_concepts`
+- `education_modules`
+- `gamification_events`
 
 Every table that stores customer data should include `tenant_id`.
 
@@ -57,6 +64,10 @@ Every table that stores customer data should include `tenant_id`.
 - `create_intro_payment`
 - `record_payment_event`
 - `retrieve_project_knowledge`
+- `validate_property_readiness`
+- `recommend_savings_plan`
+- `suggest_construction_path`
+- `unlock_buyer_milestone`
 
 ## Current Agent Runtime
 
@@ -84,3 +95,18 @@ The public website can change per client, but the engine underneath should remai
 - reporting
 - payment and savings program
 - WhatsApp human handoff
+
+## Buyer Product Direction
+
+The buyer experience should feel like a guided path toward ownership, not a one-time purchase. Many buyers cannot give a large amount at once, but can commit through smaller subscription-like payments, savings goals, education, reminders, and visible progress.
+
+The platform should help buyers:
+
+- understand whether a terrain can be bought safely
+- save toward an intro fee, reservation, monthly payment, or construction goal
+- learn what documents and risks matter before buying
+- compare future construction paths by budget, material type, and developer options
+- receive AI guidance that keeps them involved and motivated
+- unlock progress milestones that make the journey feel rewarding
+
+For agencies, the product remains a sales operating system: more qualified leads, automated nurturing, AI salesperson, admin dashboard, WhatsApp handoff, and clearer reporting.

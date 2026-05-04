@@ -26,6 +26,48 @@ const fallbackResponse: AgentResponse = {
   nextStep: "Responder pregunta del visitante.",
 };
 
+function getLocalAdvisorResponse(message: string): AgentResponse {
+  const normalized = message.toLowerCase();
+  const match = activeTenant.knowledgeBase.find((entry) =>
+    entry.keywords.some((keyword) => normalized.includes(keyword)),
+  );
+
+  if (["calcula", "calcular", "plan", "pagos", "financiamiento"].some((word) => normalized.includes(word))) {
+    return {
+      ...fallbackResponse,
+      reply: "Te dejo un cálculo rápido con los datos iniciales del proyecto.",
+      action: "calculator",
+      leadScore: 72,
+      shouldCaptureLead: false,
+      nextStep: "Mostrar plan de pagos estimado.",
+    };
+  }
+
+  if (["datos", "contacto", "whatsapp", "asesor", "cita", "visita", "apartar"].some((word) => normalized.includes(word))) {
+    return {
+      ...fallbackResponse,
+      reply: "Claro. Déjame tus datos y el interés principal para preparar el seguimiento con un asesor.",
+      action: "lead_form",
+      leadTemperature: "hot",
+      leadScore: 88,
+      shouldCaptureLead: true,
+      nextStep: "Capturar datos y preparar contacto por WhatsApp.",
+    };
+  }
+
+  return {
+    ...fallbackResponse,
+    reply: match?.answer ?? activeTenant.agent.fallback,
+    action: match ? "none" : "lead_form",
+    leadTemperature: match ? "warm" : "cold",
+    leadScore: match ? 60 : 45,
+    shouldCaptureLead: !match,
+    nextStep: match
+      ? "Responder con información del proyecto."
+      : "Ofrecer captura de datos para seguimiento humano.",
+  };
+}
+
 const responseSchema = {
   type: "object",
   additionalProperties: false,
@@ -150,17 +192,6 @@ function getOutputText(response: { output_text?: string; output?: unknown[] }) {
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json({
-      ...fallbackResponse,
-      configured: false,
-      reply:
-        "Aún falta configurar OPENAI_API_KEY. Mientras tanto puedo responder con la información básica del proyecto.",
-    });
-  }
-
   const body = (await request.json()) as {
     message?: string;
     history?: IncomingMessage[];
@@ -172,6 +203,15 @@ export async function POST(request: Request) {
       { error: "Missing message" },
       { status: 400 },
     );
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json({
+      ...getLocalAdvisorResponse(message),
+      configured: false,
+    });
   }
 
   const history = (body.history ?? [])
