@@ -350,6 +350,8 @@ function TerrainVisionCard() {
       setError(
         message === "missing_gemini_key"
           ? "Gemini no está configurado en este ambiente. Si estás en localhost, esa key solo vive en Vercel."
+          : message === "gemini_quota_exceeded"
+            ? "Gemini sí está conectado, pero la cuenta no tiene cuota o billing activo para generar imágenes."
           : "No pude enchular la foto todavía. Puede ser tamaño, permisos del modelo o configuración de Gemini.",
       );
     } finally {

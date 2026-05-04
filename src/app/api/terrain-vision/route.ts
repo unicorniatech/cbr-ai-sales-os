@@ -107,11 +107,12 @@ Debe parecer una visualización conceptual de mejora del entorno, no un render c
 
   if (!response.ok) {
     const error = await response.text();
+    const quotaExceeded = response.status === 429 || error.toLowerCase().includes("quota");
     console.error("Gemini terrain vision error", error);
     return NextResponse.json(
       {
         error: "Terrain vision generation failed",
-        code: "gemini_request_failed",
+        code: quotaExceeded ? "gemini_quota_exceeded" : "gemini_request_failed",
         detail: error.slice(0, 600),
       },
       { status: 502 },
