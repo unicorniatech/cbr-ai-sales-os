@@ -89,7 +89,7 @@ const trustItems = [
   "Pagos claros, enganches definidos y seguimiento formal",
 ];
 
-const heroVideoEndProgress = 0.95;
+const heroVideoEndProgress = 0.98;
 const heroVideoSafeTail = 0.08;
 
 function getHeroVideoTargetTime(progress: number, duration: number) {
@@ -238,7 +238,7 @@ function StickyHero() {
   }, [scrollYProgress]);
 
   return (
-    <section ref={ref} className="relative h-[180svh] md:h-[180vh]">
+    <section ref={ref} className="relative h-[240svh] md:h-[240vh]">
       <div className="sticky top-0 h-[100svh] overflow-hidden bg-[#030a16] md:h-screen">
         <motion.div
           style={{ scale: videoScale, opacity: videoOpacity }}

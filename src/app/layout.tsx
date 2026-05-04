@@ -16,6 +16,14 @@ export const metadata: Metadata = {
   title: "Grupo Inmobiliario Castrejón Rodríguez",
   description:
     "Terrenos, casas e inversiones en Morelos con claridad documental y trato directo.",
+  icons: {
+    icon: [
+      { url: "/brand/CBR-LOGO.webp", type: "image/webp" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/brand/CBR-LOGO.webp",
+    apple: "/brand/CBR-LOGO.webp",
+  },
 };
 
 export default function RootLayout({
