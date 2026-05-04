@@ -221,6 +221,69 @@ function getOutputText(response: { output_text?: string; output?: unknown[] }) {
   return "";
 }
 
+function parseAgentJson(outputText: string) {
+  try {
+    return JSON.parse(outputText);
+  } catch {
+    const match = outputText.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("No JSON object found");
+    return JSON.parse(match[0]);
+  }
+}
+
+async function callOpenAI({
+  apiKey,
+  input,
+  model,
+  structured,
+}: {
+  apiKey: string;
+  input: string;
+  model: string;
+  structured: boolean;
+}) {
+  const body: Record<string, unknown> = {
+    model,
+    instructions: structured
+      ? buildSystemPrompt()
+      : `${buildSystemPrompt()}\n\nResponde SOLO con JSON válido que incluya reply, action, leadTemperature, leadScore, shouldCaptureLead y nextStep.`,
+    input,
+    max_output_tokens: 700,
+  };
+
+  if (structured) {
+    body.text = {
+      format: {
+        type: "json_schema",
+        name: "real_estate_sales_agent_response",
+        schema: responseSchema,
+        strict: true,
+      },
+    };
+  }
+
+  const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!openaiResponse.ok) {
+    return {
+      ok: false as const,
+      error: await openaiResponse.text(),
+    };
+  }
+
+  return {
+    ok: true as const,
+    text: getOutputText(await openaiResponse.json()),
+  };
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as {
     message?: string;
@@ -257,48 +320,44 @@ Mensaje actual del visitante:
 ${message}
 `.trim();
 
-  const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_AGENT_MODEL || "gpt-5-mini",
-      instructions: buildSystemPrompt(),
-      input,
-      max_output_tokens: 700,
-      text: {
-        format: {
-          type: "json_schema",
-          name: "real_estate_sales_agent_response",
-          schema: responseSchema,
-          strict: true,
-        },
-      },
-    }),
-  });
+  const primaryModel = process.env.OPENAI_AGENT_MODEL || "gpt-5-mini";
+  const attempts = [
+    { model: primaryModel, structured: true },
+    { model: primaryModel, structured: false },
+    { model: "gpt-4.1-mini", structured: false },
+  ].filter(
+    (attempt, index, list) =>
+      list.findIndex((item) => item.model === attempt.model && item.structured === attempt.structured) === index,
+  );
+  let outputText = "";
 
-  if (!openaiResponse.ok) {
-    const errorText = await openaiResponse.text();
-    console.error("OpenAI agent error", errorText);
-    return NextResponse.json(
-      {
-        ...fallbackResponse,
-        configured: true,
-        reply:
-          "Tuve un problema conectando con el agente IA. Puedo seguir con información básica mientras se revisa la configuración.",
-      },
-      { status: 502 },
-    );
+  for (const attempt of attempts) {
+    const result = await callOpenAI({
+      apiKey,
+      input,
+      model: attempt.model,
+      structured: attempt.structured,
+    });
+
+    if (result.ok) {
+      outputText = result.text;
+      break;
+    }
+
+    console.error("OpenAI agent error", result.error);
   }
 
-  const data = await openaiResponse.json();
-  const outputText = getOutputText(data);
+  if (!outputText) {
+    return NextResponse.json({
+      ...getLocalAdvisorResponse(message),
+      configured: true,
+      providerIssue: true,
+    });
+  }
 
   try {
     return NextResponse.json({
-      ...normalizeAgentResponse(JSON.parse(outputText)),
+      ...normalizeAgentResponse(parseAgentJson(outputText)),
       configured: true,
     });
   } catch {

@@ -75,7 +75,7 @@ No agregues texto, logos, marcas de agua falsas, personas identificables ni prom
 Debe parecer una visualización conceptual de mejora del entorno, no un render corporativo artificial.
 `.trim();
 
-  const model = process.env.GEMINI_IMAGE_MODEL || "gemini-3.1-flash-image-preview";
+  const model = process.env.GEMINI_IMAGE_MODEL || "gemini-2.5-flash-image";
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
@@ -99,7 +99,7 @@ Debe parecer una visualización conceptual de mejora del entorno, no un render c
           },
         ],
         generationConfig: {
-          responseModalities: ["IMAGE"],
+          responseModalities: ["TEXT", "IMAGE"],
         },
       }),
     },
