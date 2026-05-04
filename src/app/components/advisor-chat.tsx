@@ -42,6 +42,7 @@ type ChatMessage = {
 const projectFacts = activeTenant.project;
 const knowledgeBase = activeTenant.knowledgeBase;
 const quickActions = activeTenant.quickActions;
+const terrainVisionStyles = ["Más verde", "Casa económica", "Fachada moderna", "Parque", "Iluminación"];
 
 function getAdvisorReply(input: string, id: number): ChatMessage {
   const normalized = input.toLowerCase();
@@ -259,7 +260,57 @@ function MembershipCard() {
 }
 
 function TerrainVisionCard() {
-  const chips = ["Más verde", "Casa económica", "Fachada moderna", "Parque", "Iluminación"];
+  const [sourceImage, setSourceImage] = useState<string | null>(null);
+  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [selectedStyle, setSelectedStyle] = useState(terrainVisionStyles[0]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setSourceImage(String(reader.result));
+      setResultImage(null);
+      setError("");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const generateVision = async () => {
+    if (!sourceImage) return;
+
+    setIsGenerating(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/terrain-vision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageDataUrl: sourceImage,
+          style: selectedStyle,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo generar la imagen.");
+      }
+
+      const data = (await response.json()) as { imageDataUrl?: string };
+      if (!data.imageDataUrl) {
+        throw new Error("Gemini no regresó imagen.");
+      }
+
+      setResultImage(data.imageDataUrl);
+    } catch {
+      setError("No pude enchular la foto todavía. Revisa la API key de Gemini y vuelve a intentar.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <div className="mt-3 space-y-3 border border-white/10 bg-[#06111f] p-3 text-sm">
@@ -267,25 +318,58 @@ function TerrainVisionCard() {
         <ImagePlus size={16} />
         <span className="font-medium">Enchúlame el terreno</span>
       </div>
-      <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-white/15 bg-[#030a16] px-3 text-center text-white/50">
+      <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden border border-dashed border-white/15 bg-[#030a16] px-3 text-center text-white/50">
+        {sourceImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={sourceImage} alt="Terreno original" className="max-h-44 w-full object-cover" />
+        ) : (
+          <>
+            <ImagePlus size={20} className="text-[#f3d99a]" />
+            <span>Tomar foto o subir imagen</span>
+          </>
+        )}
+        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+      </label>
+      <label className="flex min-h-11 cursor-pointer items-center justify-center gap-2 border border-white/10 bg-white/[0.035] px-3 text-xs uppercase tracking-[0.14em] text-white/65">
         <ImagePlus size={20} className="text-[#f3d99a]" />
-        <span>Sube una foto del terreno</span>
-        <input type="file" accept="image/*" className="hidden" disabled />
+        Abrir galería
+        <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       </label>
       <div className="flex flex-wrap gap-2">
-        {chips.map((chip) => (
+        {terrainVisionStyles.map((chip) => (
           <button
             key={chip}
             type="button"
-            disabled
-            className="rounded-full border border-[#d8b86f]/25 px-3 py-1 text-xs text-[#f3d99a]/75"
+            onClick={() => setSelectedStyle(chip)}
+            className={`rounded-full border px-3 py-1 text-xs ${
+              selectedStyle === chip
+                ? "border-[#d8b86f] bg-[#d8b86f]/15 text-[#f3d99a]"
+                : "border-[#d8b86f]/25 text-[#f3d99a]/75"
+            }`}
           >
             {chip}
           </button>
         ))}
       </div>
+      <button
+        type="button"
+        onClick={generateVision}
+        disabled={!sourceImage || isGenerating}
+        className="inline-flex min-h-10 w-full items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#07111f] disabled:opacity-45"
+      >
+        {isGenerating ? "Enchulando..." : "Enchúlame el terreno"}
+        <Sparkles size={14} />
+      </button>
+      {error && <p className="text-xs leading-5 text-rose-200">{error}</p>}
+      {resultImage && (
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.14em] text-white/38">Visualización generada</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={resultImage} alt="Visualización del terreno" className="max-h-64 w-full object-cover" />
+        </div>
+      )}
       <p className="text-xs leading-5 text-white/42">
-        Próximo paso: conectar Gemini para generar la visualización. Por ahora queda preparado el flujo.
+        Es inspiración visual para imaginar posibilidades; no es promesa de obra ni validación técnica.
       </p>
     </div>
   );

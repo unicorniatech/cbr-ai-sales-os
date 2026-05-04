@@ -104,7 +104,7 @@ const responseSchema = {
     },
     action: {
       type: "string",
-      enum: ["none", "lead_form", "calculator", "whatsapp_handoff"],
+      enum: ["none", "lead_form", "calculator", "membership_offer", "terrain_vision", "whatsapp_handoff"],
       description: "Acción de UI o handoff que debe activar el frontend.",
     },
     leadTemperature: {
