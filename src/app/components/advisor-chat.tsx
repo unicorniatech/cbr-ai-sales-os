@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { captureLead } from "../lib/lead-store";
+import { activeTenant, formatCurrency } from "../config/tenants";
 
 type Role = "advisor" | "visitor";
 type MessageKind = "text" | "lead-form" | "calculator";
@@ -27,63 +28,9 @@ type ChatMessage = {
   timestamp?: string;
 };
 
-const projectFacts = {
-  name: "Cumbres de Bendición",
-  location: "Ampliación Lázaro Cárdenas, Jojutla, Morelos",
-  lotSize: "200 m2",
-  dimensions: "10x20 m",
-  downPayment: 10000,
-  monthlyPayment: 2000,
-  standardPrice: 85000,
-  mainStreetPrice: 95000,
-};
-
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency: "MXN",
-    maximumFractionDigits: 0,
-  }).format(value);
-
-const knowledgeBase = [
-  {
-    keywords: ["precio", "cuesta", "costo", "vale", "mensualidad", "enganche"],
-    answer:
-      `En ${projectFacts.name}, el precio estandar es ${formatCurrency(
-        projectFacts.standardPrice,
-      )}. El enganche inicial es ${formatCurrency(
-        projectFacts.downPayment,
-      )} y las mensualidades son de ${formatCurrency(projectFacts.monthlyPayment)}. Los lotes sobre calle principal tienen precio de ${formatCurrency(
-        projectFacts.mainStreetPrice,
-      )}.`,
-  },
-  {
-    keywords: ["ubicacion", "ubicación", "donde", "jojutla", "morelos"],
-    answer: `${projectFacts.name} esta en ${projectFacts.location}. Es una zona pensada para compradores que buscan terreno delimitado, precio claro y trato directo en Morelos.`,
-  },
-  {
-    keywords: ["medida", "mide", "metros", "tamano", "tamaño", "lote"],
-    answer: `Los lotes son de ${projectFacts.lotSize}, con medidas de ${projectFacts.dimensions}. Se entregan limpios y delimitados.`,
-  },
-  {
-    keywords: ["documento", "legal", "papeles", "claridad", "contrato"],
-    answer:
-      "El enfoque comercial es comprar con claridad: informacion documental desde el primer contacto, terrenos delimitados, pagos claros y acompanamiento directo durante la decision.",
-  },
-  {
-    keywords: ["asesor", "contacto", "whatsapp", "cita", "visita"],
-    answer:
-      "Puedo tomar tus datos aqui mismo para que un asesor te contacte. Usa la opcion 'Dejar mis datos' y te muestro el formulario rapido.",
-  },
-];
-
-const quickActions = [
-  { label: "Precios", prompt: "Quiero saber precios, enganche y mensualidades." },
-  { label: "Ubicación", prompt: "Donde esta ubicado Cumbres de Bendición?" },
-  { label: "Documentación", prompt: "Que claridad documental ofrecen?" },
-  { label: "Calcular plan", prompt: "Calcula mi plan de pagos." },
-  { label: "Dejar mis datos", prompt: "Quiero dejar mis datos." },
-];
+const projectFacts = activeTenant.project;
+const knowledgeBase = activeTenant.knowledgeBase;
+const quickActions = activeTenant.quickActions;
 
 function getAdvisorReply(input: string, id: number): ChatMessage {
   const normalized = input.toLowerCase();
@@ -115,14 +62,14 @@ function getAdvisorReply(input: string, id: number): ChatMessage {
     role: "advisor",
     text:
       match?.answer ??
-      "Puedo ayudarte con precios, ubicacion, medidas, claridad documental o tomar tus datos para que un asesor te contacte.",
+      activeTenant.agent.fallback,
   };
 }
 
 function LeadCaptureMiniForm({ onSuccess }: { onSuccess: () => void }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [interest, setInterest] = useState("Cumbres de Bendición");
+  const [interest, setInterest] = useState(activeTenant.project.name);
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -170,7 +117,7 @@ function LeadCaptureMiniForm({ onSuccess }: { onSuccess: () => void }) {
         onChange={(e) => setInterest(e.target.value)}
         className="min-h-10 border border-white/10 bg-[#030a16] px-3 text-sm text-white outline-none focus:border-[#d8b86f]"
       >
-        <option>Cumbres de Bendición</option>
+        <option>{activeTenant.project.name}</option>
         <option>Terreno</option>
         <option>Casa</option>
         <option>Inversión</option>
@@ -303,7 +250,7 @@ export function AdvisorChat() {
     {
       id: 1,
       role: "advisor",
-      text: "¡Hola! Soy tu asesor virtual de CBR. ¿En qué puedo ayudarte hoy?\n\nTe puedo orientar sobre:",
+      text: `${activeTenant.agent.greeting}\n\nTe puedo orientar sobre:`,
       timestamp: new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -375,7 +322,7 @@ export function AdvisorChat() {
                   <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[#030a16] bg-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Asesor IA CBR</p>
+                  <p className="text-sm font-semibold text-white">{activeTenant.agent.name}</p>
                   <div className="flex items-center gap-1.5 text-xs text-white/50">
                     <span className="size-1.5 rounded-full bg-green-500" />
                     En línea
@@ -485,7 +432,7 @@ export function AdvisorChat() {
                 </motion.button>
               </div>
               <p className="mt-2 text-center text-[10px] text-white/25">
-                Powered by CBR AI • Respuestas instantáneas
+                Powered by {activeTenant.platformName} • Respuestas instantáneas
               </p>
             </div>
           </motion.div>

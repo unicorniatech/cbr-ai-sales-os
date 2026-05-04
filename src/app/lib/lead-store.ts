@@ -1,9 +1,12 @@
+import { activeTenant, type TenantId } from "../config/tenants";
+
 type LeadTemperature = "hot" | "warm" | "cold";
 type LeadStage = "Nuevo" | "Contactado" | "Calificado" | "Visita" | "Apartado";
 type LeadSource = "Landing" | "Asesor IA" | "WhatsApp" | "Referido";
 
 export type StoredLead = {
   id: string;
+  tenantId: TenantId;
   name: string;
   phone: string;
   interest: string;
@@ -60,6 +63,7 @@ export function captureLead({
 
   const newLead: StoredLead = {
     id: generateId(),
+    tenantId: activeTenant.id,
     name: name.trim() || "Sin nombre",
     phone: phone.trim() || "Sin teléfono",
     interest: interest || "No especificado",

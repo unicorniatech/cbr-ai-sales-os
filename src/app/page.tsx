@@ -18,76 +18,20 @@ import {
   ChevronRight,
   ChevronDown,
   FileCheck2,
-  Home as HomeIcon,
-  Landmark,
   MapPin,
   MessageCircle,
-  Ruler,
   ShieldCheck,
-  Trees,
 } from "lucide-react";
 import { AdvisorChat } from "./components/advisor-chat";
 import { captureLead } from "./lib/lead-store";
+import { activeTenant, formatCurrency } from "./config/tenants";
 
-const brand = "Grupo Inmobiliario Castrejón Rodríguez";
-const slogan = "Tu inversión segura con la seriedad que nos distingue";
-
-const project = {
-  name: "Cumbres de Bendición",
-  location: "Ampliación Lázaro Cárdenas, Jojutla, Morelos",
-  lots: "200 m2",
-  dimensions: "10x20 m",
-  description: "Terrenos limpios, delimitados y listos para iniciar patrimonio.",
-  downPayment: "$10,000 MXN",
-  monthlyPayment: "$2,000 MXN",
-  standardPrice: "$85,000 MXN",
-  mainStreetPrice: "$95,000 MXN",
-};
-
-const storySteps = [
-  "Convierte tu terreno en tu futuro hogar",
-  "Terrenos, casas e inversiones en Morelos",
-  "Compra con claridad, documentación y trato directo",
-  "Grupo Inmobiliario Castrejón Rodríguez",
-];
-
-const propertyTypes = [
-  {
-    title: "Lotes residenciales",
-    copy: "Superficies de 200 m2 para construir a tu ritmo, con pagos mensuales accesibles.",
-    icon: Ruler,
-    image:
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    title: "Casas en desarrollo",
-    copy: "Opciones habitacionales para compradores que buscan avanzar con claridad y trato directo.",
-    icon: HomeIcon,
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    title: "Terrenos patrimoniales",
-    copy: "Ubicaciones con potencial en Morelos para familias, inversionistas y constructores.",
-    icon: Trees,
-    image:
-      "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    title: "Oportunidades de inversión",
-    copy: "Activos inmobiliarios con información clara para decidir con confianza.",
-    icon: Landmark,
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
-  },
-];
-
-const trustItems = [
-  "Información documental desde el primer contacto",
-  "Terrenos delimitados y ubicaciones verificables",
-  "Acompañamiento directo durante la decisión de compra",
-  "Pagos claros, enganches definidos y seguimiento formal",
-];
+const brand = activeTenant.brand;
+const slogan = activeTenant.slogan;
+const project = activeTenant.project;
+const storySteps = activeTenant.storySteps;
+const propertyTypes = activeTenant.propertyTypes;
+const trustItems = activeTenant.trustItems;
 
 const heroVideoEndProgress = 0.98;
 const heroVideoSafeTail = 0.08;
@@ -276,7 +220,7 @@ function StickyHero() {
         <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-5 py-5 text-sm text-white/80 sm:px-10">
           <a href="#inicio" className="block w-32 sm:w-44" aria-label={brand}>
             <Image
-              src="/brand/CBR-LOGO.webp"
+              src={activeTenant.logoUrl}
               alt={brand}
               width={900}
               height={600}
@@ -417,8 +361,8 @@ function FeaturedProject() {
               {[
                 ["Ubicación", project.location],
                 ["Superficie", `${project.lots} · ${project.dimensions}`],
-                ["Enganche", project.downPayment],
-                ["Mensualidad", project.monthlyPayment],
+                ["Enganche", formatCurrency(project.downPayment)],
+                ["Mensualidad", formatCurrency(project.monthlyPayment)],
               ].map(([label, value]) => (
                 <div key={label} className="border-t border-white/12 pt-5">
                   <p className="text-xs uppercase tracking-[0.24em] text-[#d8b86f]/80">
@@ -449,13 +393,13 @@ function FeaturedProject() {
                 <div className="bg-white/[0.09] p-5 backdrop-blur">
                   <p className="text-sm text-white/58">Precio estandar</p>
                   <p className="mt-1 text-3xl font-semibold text-white">
-                    {project.standardPrice}
+                    {formatCurrency(project.standardPrice)}
                   </p>
                 </div>
                 <div className="bg-white/[0.09] p-5 backdrop-blur">
                   <p className="text-sm text-white/58">Avenida principal</p>
                   <p className="mt-1 text-3xl font-semibold text-white">
-                    {project.mainStreetPrice}
+                    {formatCurrency(project.mainStreetPrice)}
                   </p>
                 </div>
               </div>
@@ -618,7 +562,7 @@ function AdvisorSection() {
 
 function LeadForm() {
   const interestOptions = useMemo(
-    () => ["Terreno", "Casa", "Inversión", "Cumbres de Bendición"],
+    () => ["Terreno", "Casa", "Inversión", activeTenant.project.name],
     [],
   );
   const [name, setName] = useState("");
