@@ -8,6 +8,7 @@ import {
   Calculator,
   CheckCircle,
   ChevronDown,
+  ImagePlus,
   MessageCircle,
   Send,
   Sparkles,
@@ -18,8 +19,8 @@ import { captureLead } from "../lib/lead-store";
 import { activeTenant, formatCurrency } from "../config/tenants";
 
 type Role = "advisor" | "visitor";
-type MessageKind = "text" | "lead-form" | "calculator";
-type AgentApiAction = "none" | "lead_form" | "calculator" | "whatsapp_handoff";
+type MessageKind = "text" | "lead-form" | "calculator" | "membership" | "terrain-vision";
+type AgentApiAction = "none" | "lead_form" | "calculator" | "membership_offer" | "terrain_vision" | "whatsapp_handoff";
 type AgentApiResponse = {
   reply: string;
   action: AgentApiAction;
@@ -63,6 +64,24 @@ function getAdvisorReply(input: string, id: number): ChatMessage {
     };
   }
 
+  if (["membresia", "membresía", "tanda", "ahorro", "club", "mensual"].some((word) => normalized.includes(word))) {
+    return {
+      id,
+      role: "advisor",
+      kind: "membership",
+      text: "La Membresía de Patrimonio OS no es para consumir: es para crear patrimonio. Empiezas con poco, formas hábito y desbloqueas oportunidades con guía local e IA.",
+    };
+  }
+
+  if (["enchula", "enchúlame", "foto", "imagen", "terreno", "visualizar"].some((word) => normalized.includes(word))) {
+    return {
+      id,
+      role: "advisor",
+      kind: "terrain-vision",
+      text: "Va. Sube una foto y elige una intención visual para imaginar cómo podría mejorar el terreno.",
+    };
+  }
+
   const match = knowledgeBase.find((entry) =>
     entry.keywords.some((keyword) => normalized.includes(keyword)),
   );
@@ -78,6 +97,8 @@ function getAdvisorReply(input: string, id: number): ChatMessage {
 
 function getMessageKindFromAgent(response: AgentApiResponse): MessageKind | undefined {
   if (response.action === "calculator") return "calculator";
+  if (response.action === "membership_offer") return "membership";
+  if (response.action === "terrain_vision") return "terrain-vision";
   if (
     response.action === "lead_form" ||
     response.action === "whatsapp_handoff" ||
@@ -218,6 +239,58 @@ function PaymentCalculatorCard() {
   );
 }
 
+function MembershipCard() {
+  return (
+    <div className="mt-3 space-y-3 border border-[#d8b86f]/25 bg-[#06111f] p-3 text-sm">
+      <div className="flex items-center gap-2 text-[#f3d99a]">
+        <Sparkles size={16} />
+        <span className="font-medium">Membresía Patrimonio</span>
+      </div>
+      <p className="text-white/68">
+        Los primeros $100 pueden ir por nuestra cuenta. Tú continúas el hábito,
+        aprendes, avanzas y desbloqueas oportunidades reales con agencias locales.
+      </p>
+      <button className="inline-flex min-h-10 w-full items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#07111f]">
+        Quiero entrar a la lista
+        <ArrowRight size={14} />
+      </button>
+    </div>
+  );
+}
+
+function TerrainVisionCard() {
+  const chips = ["Más verde", "Casa económica", "Fachada moderna", "Parque", "Iluminación"];
+
+  return (
+    <div className="mt-3 space-y-3 border border-white/10 bg-[#06111f] p-3 text-sm">
+      <div className="flex items-center gap-2 text-[#f3d99a]">
+        <ImagePlus size={16} />
+        <span className="font-medium">Enchúlame el terreno</span>
+      </div>
+      <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 border border-dashed border-white/15 bg-[#030a16] px-3 text-center text-white/50">
+        <ImagePlus size={20} className="text-[#f3d99a]" />
+        <span>Sube una foto del terreno</span>
+        <input type="file" accept="image/*" className="hidden" disabled />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        {chips.map((chip) => (
+          <button
+            key={chip}
+            type="button"
+            disabled
+            className="rounded-full border border-[#d8b86f]/25 px-3 py-1 text-xs text-[#f3d99a]/75"
+          >
+            {chip}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs leading-5 text-white/42">
+        Próximo paso: conectar Gemini para generar la visualización. Por ahora queda preparado el flujo.
+      </p>
+    </div>
+  );
+}
+
 function TypingIndicator() {
   return (
     <div className="flex gap-1 px-1">
@@ -274,6 +347,8 @@ function MessageBubble({ message }: { message: ChatMessage }) {
             <LeadCaptureMiniForm onSuccess={() => {}} />
           )}
           {message.kind === "calculator" && <PaymentCalculatorCard />}
+          {message.kind === "membership" && <MembershipCard />}
+          {message.kind === "terrain-vision" && <TerrainVisionCard />}
         </div>
 
         <span className={`text-[10px] text-white/40 ${isVisitor ? "text-right" : "text-left"} block`}>

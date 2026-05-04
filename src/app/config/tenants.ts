@@ -138,6 +138,18 @@ export const tenants: Record<TenantId, TenantConfig> = {
     ],
     knowledgeBase: [
       {
+        id: "membership",
+        keywords: ["membresia", "membresía", "tanda", "ahorro", "100", "cien", "mensual", "club"],
+        answer:
+          "La Membresía de Patrimonio OS no es para consumir contenido: es para crear patrimonio. Empiezas con aportaciones pequeñas, construyes disciplina, aprendes, desbloqueas oportunidades y avanzas hacia un terreno con guía local, mexicana y asistida por IA. La agencia paga la plataforma; el comprador usa la experiencia para comprometerse con su futuro.",
+      },
+      {
+        id: "terrain-vision",
+        keywords: ["enchula", "enchúlame", "foto", "imagen", "terreno", "visualizar", "diseno", "diseño"],
+        answer:
+          "Podemos ayudarte a imaginar el potencial del terreno con una visualización: más verde, más limpio, con casa económica, iluminación, parque o fachada. Es inspiración visual, no promesa de obra ni aval técnico.",
+      },
+      {
         id: "pricing",
         keywords: ["precio", "cuesta", "costo", "vale", "mensualidad", "enganche"],
         answer: `En ${cbrProject.name}, el precio estandar es ${formatCurrency(
@@ -174,7 +186,9 @@ export const tenants: Record<TenantId, TenantConfig> = {
       },
     ],
     quickActions: [
+      { label: "Membresía", prompt: "Explícame la Membresía de Patrimonio OS." },
       { label: "Precios", prompt: "Quiero saber precios, enganche y mensualidades." },
+      { label: "Enchúlame", prompt: "Quiero enchular una foto de mi terreno." },
       { label: "Ubicación", prompt: "Donde esta ubicado Cumbres de Bendición?" },
       { label: "Documentación", prompt: "Que claridad documental ofrecen?" },
       { label: "Calcular plan", prompt: "Calcula mi plan de pagos." },

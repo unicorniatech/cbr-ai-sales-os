@@ -6,7 +6,7 @@ type IncomingMessage = {
   text: string;
 };
 
-type AgentAction = "none" | "lead_form" | "calculator" | "whatsapp_handoff";
+type AgentAction = "none" | "lead_form" | "calculator" | "membership_offer" | "terrain_vision" | "whatsapp_handoff";
 
 type AgentResponse = {
   reply: string;
@@ -40,6 +40,32 @@ function getLocalAdvisorResponse(message: string): AgentResponse {
       leadScore: 72,
       shouldCaptureLead: false,
       nextStep: "Mostrar plan de pagos estimado.",
+    };
+  }
+
+  if (["membresia", "membresía", "tanda", "ahorro", "100", "cien", "mensual", "club"].some((word) => normalized.includes(word))) {
+    return {
+      ...fallbackResponse,
+      reply:
+        "La Membresía de Patrimonio OS es una forma mexicana y local de avanzar hacia patrimonio. No pagas para consumir contenido: aportas para crear. La idea es empezar con poco, formar hábito, aprender, desbloquear oportunidades y recibir guía para moverte hacia un terreno o una casa con claridad.",
+      action: "membership_offer",
+      leadTemperature: "warm",
+      leadScore: 78,
+      shouldCaptureLead: true,
+      nextStep: "Explicar membresía y ofrecer captura para lista de interesados.",
+    };
+  }
+
+  if (["enchula", "enchúlame", "foto", "imagen", "visualizar", "diseno", "diseño"].some((word) => normalized.includes(word))) {
+    return {
+      ...fallbackResponse,
+      reply:
+        "Sí. La idea es subir una foto del terreno y generar una visión de cómo podría mejorar: más verde, limpio, iluminado, con fachada o con una casa sencilla. Es una herramienta para imaginar posibilidades, no una promesa de construcción.",
+      action: "terrain_vision",
+      leadTemperature: "warm",
+      leadScore: 82,
+      shouldCaptureLead: true,
+      nextStep: "Mostrar herramienta Enchúlame el terreno.",
     };
   }
 
@@ -127,6 +153,8 @@ Objetivo:
 - Calificar intención de compra sin presionar de forma agresiva.
 - Capturar leads cuando haya intención, duda concreta, interés en precio, visita, ubicación, documentos o pagos.
 - Sugerir handoff a WhatsApp cuando el lead está listo para visita, apartado, llamada o contacto humano.
+- Explicar la Membresía como una forma mexicana de compromiso patrimonial: no se paga para consumir, se aporta para crear, aprender y avanzar.
+- Presentar "Enchúlame el terreno" cuando el usuario quiera subir foto, imaginar mejoras, diseño, fachada, casa, parque o visualización.
 - Nunca inventes disponibilidad, condiciones legales, promesas de plusvalía garantizada o datos no dados.
 - Si falta información, responde con honestidad y ofrece conectar con asesor.
 
@@ -146,6 +174,8 @@ ${kb}
 Reglas de acción:
 - Usa "lead_form" si el usuario quiere contacto, visita, WhatsApp, asesor, documentos, ubicación exacta o muestra intención de compra.
 - Usa "calculator" si pregunta por pagos, mensualidades, enganche, plan o financiamiento.
+- Usa "membership_offer" si pregunta por membresía, ahorro, tanda, aportaciones pequeñas, club, mensualidad o cómo empezar con poco.
+- Usa "terrain_vision" si pregunta por subir una foto, transformar imagen, diseño visual, mejorar entorno o "enchular" un terreno.
 - Usa "whatsapp_handoff" si parece listo para hablar con humano, visitar, apartar o cerrar.
 - Usa "none" para respuestas informativas simples.
 
