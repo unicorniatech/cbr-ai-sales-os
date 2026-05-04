@@ -47,7 +47,10 @@ export async function POST(request: Request) {
 
   if (!apiKey) {
     return NextResponse.json(
-      { error: "GOOGLE_GENERATIVE_AI_API_KEY is not configured" },
+      {
+        error: "GOOGLE_GENERATIVE_AI_API_KEY is not configured",
+        code: "missing_gemini_key",
+      },
       { status: 500 },
     );
   }
@@ -106,7 +109,11 @@ Debe parecer una visualización conceptual de mejora del entorno, no un render c
     const error = await response.text();
     console.error("Gemini terrain vision error", error);
     return NextResponse.json(
-      { error: "Terrain vision generation failed" },
+      {
+        error: "Terrain vision generation failed",
+        code: "gemini_request_failed",
+        detail: error.slice(0, 600),
+      },
       { status: 502 },
     );
   }
@@ -115,8 +122,12 @@ Debe parecer una visualización conceptual de mejora del entorno, no un render c
   const generatedImage = getGeneratedImage(data);
 
   if (!generatedImage) {
+    console.error("Gemini terrain vision returned no image", JSON.stringify(data).slice(0, 1000));
     return NextResponse.json(
-      { error: "No image returned" },
+      {
+        error: "No image returned",
+        code: "no_image_returned",
+      },
       { status: 502 },
     );
   }

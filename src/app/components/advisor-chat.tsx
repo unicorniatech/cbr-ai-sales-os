@@ -44,6 +44,41 @@ const knowledgeBase = activeTenant.knowledgeBase;
 const quickActions = activeTenant.quickActions;
 const terrainVisionStyles = ["Más verde", "Casa económica", "Fachada moderna", "Parque", "Iluminación"];
 
+function compressImageFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
+    reader.onload = () => {
+      const image = new Image();
+
+      image.onerror = () => reject(new Error("No se pudo cargar la imagen."));
+      image.onload = () => {
+        const maxSize = 1280;
+        const ratio = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const width = Math.round(image.width * ratio);
+        const height = Math.round(image.height * ratio);
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        if (!context) {
+          reject(new Error("No se pudo preparar la imagen."));
+          return;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        context.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+
+      image.src = String(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
 function getAdvisorReply(input: string, id: number): ChatMessage {
   const normalized = input.toLowerCase();
 
@@ -266,17 +301,20 @@ function TerrainVisionCard() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSourceImage(String(reader.result));
+    try {
+      const compressedImage = await compressImageFile(file);
+      setSourceImage(compressedImage);
       setResultImage(null);
       setError("");
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      setError("No pude preparar la foto. Intenta con otra imagen.");
+    } finally {
+      event.target.value = "";
+    }
   };
 
   const generateVision = async () => {
@@ -296,7 +334,8 @@ function TerrainVisionCard() {
       });
 
       if (!response.ok) {
-        throw new Error("No se pudo generar la imagen.");
+        const data = (await response.json().catch(() => null)) as { code?: string } | null;
+        throw new Error(data?.code || "generation_failed");
       }
 
       const data = (await response.json()) as { imageDataUrl?: string };
@@ -305,8 +344,14 @@ function TerrainVisionCard() {
       }
 
       setResultImage(data.imageDataUrl);
-    } catch {
-      setError("No pude enchular la foto todavía. Revisa la API key de Gemini y vuelve a intentar.");
+    } catch (generationError) {
+      const message = generationError instanceof Error ? generationError.message : "";
+
+      setError(
+        message === "missing_gemini_key"
+          ? "Gemini no está configurado en este ambiente. Si estás en localhost, esa key solo vive en Vercel."
+          : "No pude enchular la foto todavía. Puede ser tamaño, permisos del modelo o configuración de Gemini.",
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -325,7 +370,7 @@ function TerrainVisionCard() {
         ) : (
           <>
             <ImagePlus size={20} className="text-[#f3d99a]" />
-            <span>Tomar foto o subir imagen</span>
+            <span>Tomar foto con cámara</span>
           </>
         )}
         <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
