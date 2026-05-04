@@ -288,6 +288,7 @@ export async function POST(request: Request) {
   const body = (await request.json()) as {
     message?: string;
     history?: IncomingMessage[];
+    debug?: boolean;
   };
   const message = body.message?.trim();
 
@@ -330,6 +331,7 @@ ${message}
       list.findIndex((item) => item.model === attempt.model && item.structured === attempt.structured) === index,
   );
   let outputText = "";
+  const providerErrors: string[] = [];
 
   for (const attempt of attempts) {
     const result = await callOpenAI({
@@ -344,6 +346,7 @@ ${message}
       break;
     }
 
+    providerErrors.push(`${attempt.model}/${attempt.structured ? "structured" : "plain"}: ${result.error.slice(0, 600)}`);
     console.error("OpenAI agent error", result.error);
   }
 
@@ -352,6 +355,7 @@ ${message}
       ...getLocalAdvisorResponse(message),
       configured: true,
       providerIssue: true,
+      ...(body.debug ? { providerErrors } : {}),
     });
   }
 
