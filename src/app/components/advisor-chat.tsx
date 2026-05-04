@@ -19,6 +19,16 @@ import { activeTenant, formatCurrency } from "../config/tenants";
 
 type Role = "advisor" | "visitor";
 type MessageKind = "text" | "lead-form" | "calculator";
+type AgentApiAction = "none" | "lead_form" | "calculator" | "whatsapp_handoff";
+type AgentApiResponse = {
+  reply: string;
+  action: AgentApiAction;
+  leadTemperature: "hot" | "warm" | "cold";
+  leadScore: number;
+  shouldCaptureLead: boolean;
+  nextStep: string;
+  configured?: boolean;
+};
 
 type ChatMessage = {
   id: number;
@@ -63,6 +73,50 @@ function getAdvisorReply(input: string, id: number): ChatMessage {
     text:
       match?.answer ??
       activeTenant.agent.fallback,
+  };
+}
+
+function getMessageKindFromAgent(response: AgentApiResponse): MessageKind | undefined {
+  if (response.action === "calculator") return "calculator";
+  if (
+    response.action === "lead_form" ||
+    response.action === "whatsapp_handoff" ||
+    response.shouldCaptureLead
+  ) {
+    return "lead-form";
+  }
+
+  return undefined;
+}
+
+async function requestAgentReply(
+  message: string,
+  history: ChatMessage[],
+  id: number,
+): Promise<ChatMessage> {
+  const response = await fetch("/api/agent/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message,
+      history: history.slice(-8).map((item) => ({
+        role: item.role,
+        text: item.text,
+      })),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Agent request failed");
+  }
+
+  const data = (await response.json()) as AgentApiResponse;
+
+  return {
+    id,
+    role: "advisor",
+    kind: getMessageKindFromAgent(data),
+    text: data.reply || activeTenant.agent.fallback,
   };
 }
 
@@ -289,7 +343,15 @@ export function AdvisorChat() {
     setIsTyping(false);
 
     const advisorId = nextIdRef.current++;
-    const reply = getAdvisorReply(cleanValue, advisorId);
+    const history = [...messages, visitorMessage];
+    let reply: ChatMessage;
+
+    try {
+      reply = await requestAgentReply(cleanValue, history, advisorId);
+    } catch {
+      reply = getAdvisorReply(cleanValue, advisorId);
+    }
+
     reply.timestamp = new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
 
     setMessages((current) => [...current, reply]);

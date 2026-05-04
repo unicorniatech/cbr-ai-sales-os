@@ -58,6 +58,17 @@ Every table that stores customer data should include `tenant_id`.
 - `record_payment_event`
 - `retrieve_project_knowledge`
 
+## Current Agent Runtime
+
+The public advisor widget calls `POST /api/agent/chat`. That route uses the active tenant configuration as the initial knowledge base and returns structured JSON for the chat reply plus UI actions such as lead capture, calculator display, or WhatsApp handoff.
+
+Required environment variables:
+
+- `OPENAI_API_KEY`: server-only OpenAI API key.
+- `OPENAI_AGENT_MODEL`: optional model override. Defaults to `gpt-5-mini`.
+
+If the key is missing, the widget keeps working with the local fallback knowledge responses.
+
 ## Product Direction
 
 The public website can change per client, but the engine underneath should remain shared:
@@ -69,4 +80,3 @@ The public website can change per client, but the engine underneath should remai
 - reporting
 - payment and savings program
 - WhatsApp human handoff
-
