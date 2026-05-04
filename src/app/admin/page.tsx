@@ -709,8 +709,8 @@ export default function AdminDashboard() {
               <LayoutDashboard size={20} />
             </span>
             <div>
-              <p className="text-sm font-semibold">CBR Sales OS</p>
-              <p className="text-xs text-white/45">Admin dashboard</p>
+              <p className="text-sm font-semibold">Patrimonio OS</p>
+              <p className="text-xs text-white/45">Workspace CBR</p>
             </div>
           </Link>
 

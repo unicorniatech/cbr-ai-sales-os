@@ -80,7 +80,7 @@ const cbrProject: ProjectConfig = {
 export const tenants: Record<TenantId, TenantConfig> = {
   cbr: {
     id: "cbr",
-    platformName: "AI Sales OS",
+    platformName: "Patrimonio OS",
     brand: "Grupo Inmobiliario Castrejón Rodríguez",
     slogan: "Tu inversión segura con la seriedad que nos distingue",
     logoUrl: "/brand/CBR-LOGO.webp",

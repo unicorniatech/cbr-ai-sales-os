@@ -1,6 +1,6 @@
-# AI Sales OS Architecture
+# Patrimonio OS Architecture
 
-This product is designed as a multi-tenant AI sales platform.
+Patrimonio OS is a working name for the multi-tenant platform. It is not a single realtor website. It is the shared operating layer where agencies sell, buyers compare opportunities, and both sides move toward land and home ownership with AI guidance.
 
 CBR is the first tenant, not the whole system.
 
@@ -9,6 +9,7 @@ CBR is the first tenant, not the whole system.
 - `tenant`: a realtor, developer, architect, construction company, bank, or partner.
 - `project`: a real estate or construction offer owned by a tenant.
 - `agent`: the branded AI salesperson for a tenant or project.
+- `marketplace`: the cross-tenant buyer experience where a client can discover, compare, save for, and move between offers from different agencies.
 - `knowledge_base`: tenant/project-specific answers and sales context.
 - `lead`: a captured prospect with score, temperature, source, stage, and next action.
 - `conversation`: messages between visitor, AI agent, and later human operators.
@@ -19,6 +20,9 @@ CBR is the first tenant, not the whole system.
 ## First Tenant
 
 Tenant ID: `cbr`
+
+Workspace:
+CBR tenant inside Patrimonio OS
 
 Brand:
 Grupo Inmobiliario Castrejón Rodríguez
@@ -90,7 +94,9 @@ The public website can change per client, but the engine underneath should remai
 
 - branded landing page
 - embeddable AI sales widget
+- multi-tenant marketplace
 - tenant admin dashboard
+- unified buyer account across agencies
 - buyer portal
 - reporting
 - payment and savings program
@@ -102,6 +108,7 @@ The buyer experience should feel like a guided path toward ownership, not a one-
 
 The platform should help buyers:
 
+- move between opportunities from different real estate agencies without losing their profile, savings history, education progress, or preferences
 - understand whether a terrain can be bought safely
 - save toward an intro fee, reservation, monthly payment, or construction goal
 - learn what documents and risks matter before buying
