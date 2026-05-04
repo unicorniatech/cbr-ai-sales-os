@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowDownRight,
@@ -23,7 +23,7 @@ import {
   Sparkles,
   UsersRound,
 } from "lucide-react";
-import { getAllLeads, type StoredLead } from "../lib/lead-store";
+import { fetchRemoteLeads, getAllLeads, type StoredLead } from "../lib/lead-store";
 
 type LeadTemperature = "hot" | "warm" | "cold";
 type LeadStage = "Nuevo" | "Contactado" | "Calificado" | "Visita" | "Apartado";
@@ -654,6 +654,32 @@ export default function AdminDashboard() {
   const [selectedLeadId, setSelectedLeadId] = useState(leads[0].id);
   const [capturedLeads, setCapturedLeads] = useState<StoredLead[]>(() => getAllLeads());
 
+  const refreshLeads = useCallback(async () => {
+    const remoteLeads = await fetchRemoteLeads();
+    const localLeads = getAllLeads();
+    const merged = [...remoteLeads, ...localLeads].filter(
+      (lead, index, list) => list.findIndex((item) => item.id === lead.id) === index,
+    );
+    setCapturedLeads(merged);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchRemoteLeads().then((remoteLeads) => {
+      if (!isMounted) return;
+      const localLeads = getAllLeads();
+      const merged = [...remoteLeads, ...localLeads].filter(
+        (lead, index, list) => list.findIndex((item) => item.id === lead.id) === index,
+      );
+      setCapturedLeads(merged);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Combine mock leads with captured leads
   const allLeads = useMemo(() => {
     return [...capturedLeads, ...leads];
@@ -665,10 +691,6 @@ export default function AdminDashboard() {
     const value = lead.budget.includes("95") ? 95000 : lead.budget.includes("85") ? 85000 : 0;
     return sum + value;
   }, 0);
-
-  const refreshLeads = () => {
-    setCapturedLeads(getAllLeads());
-  };
 
   const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },

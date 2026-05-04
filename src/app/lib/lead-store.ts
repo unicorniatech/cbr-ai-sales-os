@@ -46,6 +46,18 @@ function saveLeads(leads: StoredLead[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
 }
 
+function persistLeadRemotely(lead: StoredLead): void {
+  if (typeof window === "undefined") return;
+
+  fetch("/api/leads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(lead),
+  }).catch(() => {
+    // Local storage remains the offline-safe source when the backend is unavailable.
+  });
+}
+
 export function captureLead({
   name,
   phone,
@@ -79,7 +91,19 @@ export function captureLead({
   };
 
   saveLeads([newLead, ...leads]);
+  persistLeadRemotely(newLead);
   return newLead;
+}
+
+export async function fetchRemoteLeads(): Promise<StoredLead[]> {
+  try {
+    const response = await fetch("/api/admin/leads", { cache: "no-store" });
+    if (!response.ok) return [];
+    const data = (await response.json()) as { leads?: StoredLead[] };
+    return data.leads ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export function getAllLeads(): StoredLead[] {

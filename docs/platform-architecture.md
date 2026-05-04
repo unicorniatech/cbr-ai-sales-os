@@ -66,8 +66,12 @@ Required environment variables:
 
 - `OPENAI_API_KEY`: server-only OpenAI API key.
 - `OPENAI_AGENT_MODEL`: optional model override. Defaults to `gpt-5-mini`.
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL for lead persistence.
+- `SUPABASE_SERVICE_ROLE_KEY`: server-only Supabase key for API routes.
 
 If the key is missing, the widget keeps working with the local fallback knowledge responses.
+
+Lead capture now posts to `POST /api/leads`. The admin dashboard reads `GET /api/admin/leads`. Both routes gracefully fall back when Supabase is not configured. Initial SQL is in `docs/supabase-schema.sql`.
 
 ## Product Direction
 
