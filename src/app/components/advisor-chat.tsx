@@ -42,6 +42,7 @@ type ChatMessage = {
 const projectFacts = activeTenant.project;
 const knowledgeBase = activeTenant.knowledgeBase;
 const quickActions = activeTenant.quickActions;
+const adminUrl = "https://cbr-ai-sales-os.vercel.app/admin";
 const terrainVisionStyles = ["Más verde", "Casa económica", "Fachada moderna", "Parque", "Iluminación"];
 
 function compressImageFile(file: File): Promise<string> {
@@ -187,12 +188,28 @@ function LeadCaptureMiniForm({ onSuccess }: { onSuccess: () => void }) {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
 
-    captureLead({
+    const lead = captureLead({
       name,
       phone,
       interest,
       source: "Asesor IA",
     });
+
+    const whatsappMessage = [
+      "Nuevo lead desde el Asesor IA CBR",
+      `Nombre: ${lead.name}`,
+      `WhatsApp: ${lead.phone}`,
+      `Interés: ${lead.interest}`,
+      `Score: ${lead.score}`,
+      `Admin: ${adminUrl}`,
+    ].join("\n");
+
+    window.open(
+      `https://wa.me/${activeTenant.contact.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+
     setSubmitted(true);
     setTimeout(onSuccess, 2000);
   };
@@ -230,8 +247,8 @@ function LeadCaptureMiniForm({ onSuccess }: { onSuccess: () => void }) {
       >
         <option>{activeTenant.project.name}</option>
         <option>Terreno</option>
-        <option>Casa</option>
-        <option>Inversión</option>
+        <option>Lote sobre calle principal</option>
+        <option>Documentación</option>
       </select>
       <button
         type="submit"
@@ -464,7 +481,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         </motion.span>
       )}
 
-      <div className={`max-w-[85%] space-y-1 ${isVisitor ? "items-end" : "items-start"}`}>
+      <div className={`max-w-[92%] space-y-1 sm:max-w-[78%] ${isVisitor ? "items-end" : "items-start"}`}>
         <div
           className={`relative px-4 py-3 text-sm leading-relaxed shadow-lg ${
             isVisitor
@@ -525,6 +542,17 @@ export function AdvisorChat() {
     }
   }, [messages, isTyping]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   const sendMessage = async (value: string) => {
     const cleanValue = value.trim();
     if (!cleanValue) return;
@@ -564,7 +592,7 @@ export function AdvisorChat() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="pointer-events-none fixed inset-0 z-50">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -572,7 +600,7 @@ export function AdvisorChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.98 }}
             transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="mb-4 flex h-[min(600px,calc(100vh-140px))] w-[min(400px,calc(100vw-48px))] flex-col overflow-hidden rounded-2xl border border-white/20 bg-[#030a16]/98 shadow-2xl shadow-black/50 backdrop-blur-xl"
+            className="pointer-events-auto flex h-[100svh] w-screen flex-col overflow-hidden border border-white/20 bg-[#030a16]/98 shadow-2xl shadow-black/50 backdrop-blur-xl"
           >
             {/* Header */}
             <div className="relative flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#030a16] to-[#07111f] px-5 py-4">
@@ -616,7 +644,7 @@ export function AdvisorChat() {
                 className="border-b border-white/5 bg-gradient-to-r from-[#d8b86f]/10 to-transparent px-5 py-3"
               >
                 <div className="flex flex-wrap gap-2">
-                  {["💰 Precios", "📍 Ubicación", "📋 Documentos", "🧮 Plan de pagos"].map((tag) => (
+                  {["Precios", "Ubicación", "Documentos", "Plan de pagos", "Dejar datos"].map((tag) => (
                     <span key={tag} className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[10px] text-white/60">
                       {tag}
                     </span>
@@ -653,7 +681,7 @@ export function AdvisorChat() {
             {/* Quick Actions */}
             <div className="border-t border-white/5 px-4 pt-3">
               <p className="mb-2 text-[10px] uppercase tracking-wider text-white/30">Sugerencias rápidas</p>
-              <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
+              <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-3 md:flex-wrap md:overflow-visible">
                 {quickActions.map((action) => (
                   <motion.button
                     key={action.label}
@@ -714,7 +742,7 @@ export function AdvisorChat() {
         type="button"
         aria-label={unreadLabel}
         onClick={() => setIsOpen((c) => !c)}
-        className="group relative flex min-h-14 items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-r from-[#d8b86f] to-[#c4a55a] px-5 text-sm font-semibold uppercase tracking-[0.14em] text-[#07111f] shadow-2xl shadow-black/40 transition hover:shadow-xl"
+        className="pointer-events-auto group fixed bottom-5 right-5 flex min-h-14 items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-r from-[#d8b86f] to-[#c4a55a] px-5 text-sm font-semibold uppercase tracking-[0.14em] text-[#07111f] shadow-2xl shadow-black/40 transition hover:shadow-xl"
       >
         <motion.span
           animate={{ rotate: isOpen ? 90 : 0 }}

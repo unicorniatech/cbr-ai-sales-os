@@ -51,6 +51,7 @@ export type TenantConfig = {
     address: string;
     whatsapp: string;
     whatsappHref: string;
+    whatsappNumber: string;
   };
   mission: string;
   vision: string;
@@ -95,6 +96,7 @@ export const tenants: Record<TenantId, TenantConfig> = {
     contact: {
       address: "Calle 20 de noviembre, colonia Lázaro Cárdenas, Jojutla, Morelos",
       whatsapp: "+52 1 777 266 2208",
+      whatsappNumber: "5217772662208",
       whatsappHref: "https://wa.me/5217772662208",
     },
     mission:
