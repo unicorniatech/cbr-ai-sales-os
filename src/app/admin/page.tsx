@@ -12,8 +12,10 @@ import {
   CircleDollarSign,
   Flame,
   ImageIcon,
+  KeyRound,
   LayoutDashboard,
   ListFilter,
+  LogOut,
   MessageCircle,
   Phone,
   RefreshCw,
@@ -161,6 +163,9 @@ const temperatureStyles = {
 };
 
 const stages: LeadStage[] = ["Nuevo", "Contactado", "Calificado", "Visita", "Apartado"];
+const ADMIN_EMAIL = "carmen.castrejon@cbr.mx";
+const ADMIN_PASSWORD = "C@strejon2208";
+const ADMIN_SESSION_KEY = "cbr-admin-session-v1";
 
 function StatCard({
   label,
@@ -662,18 +667,25 @@ type EditableSection = {
 
 const editableContentDefaults: EditableSection[] = [
   {
-    id: "hero",
-    title: activeTenant.brand,
-    copy: activeTenant.slogan,
-    image: "/videos/CBR-intro-poster.jpg",
-    link: "/",
-  },
-  {
     id: "proyecto",
     title: activeTenant.project.name,
     copy: activeTenant.subtitle,
     image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=82",
     link: "/secciones/cumbres-de-bendicion",
+  },
+  {
+    id: "terrenos-200m2",
+    title: "Lotes de 200 m2",
+    copy: "Terrenos de 10x20 m, totalmente limpios y delimitados para iniciar patrimonio con claridad.",
+    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
+    link: "/secciones/lotes-200m2",
+  },
+  {
+    id: "calle-principal",
+    title: "Lotes sobre calle principal",
+    copy: "Ubicaciones con mayor exposición dentro del proyecto, con precio definido de $95,000 MXN.",
+    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
+    link: "/secciones/calle-principal",
   },
   {
     id: "mision",
@@ -689,6 +701,20 @@ const editableContentDefaults: EditableSection[] = [
     image: "",
     link: "/secciones/vision",
   },
+  {
+    id: "valores",
+    title: "Valores clave",
+    copy: activeTenant.values.join(", "),
+    image: "",
+    link: "/secciones/claridad-documental",
+  },
+  {
+    id: "ubicacion-contacto",
+    title: "Ubicación y contacto",
+    copy: `${activeTenant.contact.address}. WhatsApp: ${activeTenant.contact.whatsapp}`,
+    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1300&q=80",
+    link: "/#contacto",
+  },
 ];
 
 function loadEditableContent() {
@@ -696,7 +722,8 @@ function loadEditableContent() {
 
   try {
     const saved = localStorage.getItem("cbr-editable-content-v1");
-    return saved ? (JSON.parse(saved) as EditableSection[]) : editableContentDefaults;
+    const parsed = saved ? (JSON.parse(saved) as EditableSection[]) : editableContentDefaults;
+    return parsed.filter((section) => section.id !== "hero");
   } catch {
     return editableContentDefaults;
   }
@@ -724,7 +751,7 @@ function ContentEditorView() {
         <div>
           <p className="text-lg font-semibold">Editor de frontend</p>
           <p className="mt-1 text-sm text-white/42">
-            Base para que el cliente edite textos, enlaces y fotos por sección. Después se conecta a Supabase Storage/CMS.
+            Base para editar textos, enlaces, fotos y subpáginas. El hero queda bloqueado para proteger la primera impresión.
           </p>
         </div>
         <button
@@ -797,7 +824,71 @@ function ContentEditorView() {
   );
 }
 
-export default function AdminDashboard() {
+function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (email.trim().toLowerCase() === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, "authenticated");
+      onSuccess();
+      return;
+    }
+
+    setError("Correo o contraseña incorrectos.");
+  };
+
+  return (
+    <main className="grid min-h-screen place-items-center bg-[#030a16] px-6 text-white">
+      <form onSubmit={handleSubmit} className="w-full max-w-md border border-white/10 bg-white/[0.035] p-6 shadow-2xl shadow-black/35">
+        <span className="grid size-12 place-items-center border border-[#d8b86f]/40 bg-[#d8b86f]/10 text-[#f3d99a]">
+          <KeyRound size={22} />
+        </span>
+        <h1 className="mt-6 text-3xl font-semibold">Acceso administrativo</h1>
+        <p className="mt-2 text-sm leading-6 text-white/52">
+          Panel privado para editar contenido, revisar leads y preparar el sitio de CBR.
+        </p>
+        <div className="mt-7 grid gap-4">
+          <label className="grid gap-2 text-sm text-white/58">
+            Correo
+            <input
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="min-h-12 border border-white/10 bg-[#06111f] px-3 text-white outline-none focus:border-[#d8b86f]"
+              type="email"
+              autoComplete="email"
+              placeholder="carmen.castrejon@cbr.mx"
+            />
+          </label>
+          <label className="grid gap-2 text-sm text-white/58">
+            Contraseña
+            <input
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="min-h-12 border border-white/10 bg-[#06111f] px-3 text-white outline-none focus:border-[#d8b86f]"
+              type="password"
+              autoComplete="current-password"
+              placeholder="Contraseña"
+            />
+          </label>
+        </div>
+        {error && <p className="mt-4 border border-rose-300/25 bg-rose-300/10 p-3 text-sm text-rose-100">{error}</p>}
+        <button
+          type="submit"
+          className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 bg-[#d8b86f] px-4 text-sm font-semibold uppercase tracking-[0.16em] text-[#07111f]"
+        >
+          Entrar al tablero
+          <KeyRound size={16} />
+        </button>
+      </form>
+    </main>
+  );
+}
+
+function AdminShell({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [selectedLeadId, setSelectedLeadId] = useState(leads[0].id);
   const [capturedLeads, setCapturedLeads] = useState<StoredLead[]>(() => getAllLeads());
@@ -886,6 +977,13 @@ export default function AdminDashboard() {
             <button className="grid size-10 place-items-center border border-white/10 bg-white/[0.045] text-white/68 transition hover:border-[#d8b86f]/55 hover:text-[#f3d99a]">
               <Settings size={18} />
             </button>
+            <button
+              onClick={onLogout}
+              className="grid size-10 place-items-center border border-white/10 bg-white/[0.045] text-white/68 transition hover:border-rose-300/55 hover:text-rose-200"
+              title="Cerrar sesión"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </div>
       </header>
@@ -934,4 +1032,33 @@ export default function AdminDashboard() {
       </div>
     </main>
   );
+}
+
+export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [hasCheckedSession, setHasCheckedSession] = useState(false);
+
+  useEffect(() => {
+    const checkSession = window.setTimeout(() => {
+      setIsAuthenticated(sessionStorage.getItem(ADMIN_SESSION_KEY) === "authenticated");
+      setHasCheckedSession(true);
+    }, 0);
+
+    return () => window.clearTimeout(checkSession);
+  }, []);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    setIsAuthenticated(false);
+  };
+
+  if (!hasCheckedSession) {
+    return <main className="min-h-screen bg-[#030a16]" />;
+  }
+
+  if (!isAuthenticated) {
+    return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
+  }
+
+  return <AdminShell onLogout={handleLogout} />;
 }
