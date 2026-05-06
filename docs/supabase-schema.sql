@@ -17,3 +17,22 @@ create table if not exists public.leads (
 
 create index if not exists leads_tenant_created_at_idx
   on public.leads (tenant_id, created_at desc);
+
+create table if not exists public.content_sections (
+  tenant_id text not null,
+  section_id text not null,
+  title text not null,
+  copy text not null default '',
+  image_url text not null default '',
+  link text not null default '',
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now(),
+  primary key (tenant_id, section_id)
+);
+
+create index if not exists content_sections_tenant_sort_idx
+  on public.content_sections (tenant_id, sort_order asc);
+
+insert into storage.buckets (id, name, public)
+values ('cbr-content', 'cbr-content', true)
+on conflict (id) do update set public = true;

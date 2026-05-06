@@ -28,7 +28,11 @@ import {
   UsersRound,
 } from "lucide-react";
 import { fetchRemoteLeads, getAllLeads, type StoredLead } from "../lib/lead-store";
-import { activeTenant } from "../config/tenants";
+import {
+  editableContentDefaults,
+  mergeEditableSections,
+  type EditableSection,
+} from "../lib/editable-content";
 
 type LeadTemperature = "hot" | "warm" | "cold";
 type LeadStage = "Nuevo" | "Contactado" | "Calificado" | "Visita" | "Apartado";
@@ -657,81 +661,35 @@ function TasksView() {
   );
 }
 
-type EditableSection = {
-  id: string;
-  title: string;
-  copy: string;
-  image: string;
-  link: string;
-};
-
-const editableContentDefaults: EditableSection[] = [
-  {
-    id: "proyecto",
-    title: activeTenant.project.name,
-    copy: activeTenant.subtitle,
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=82",
-    link: "/secciones/cumbres-de-bendicion",
-  },
-  {
-    id: "terrenos-200m2",
-    title: "Lotes de 200 m2",
-    copy: "Terrenos de 10x20 m, totalmente limpios y delimitados para iniciar patrimonio con claridad.",
-    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
-    link: "/secciones/lotes-200m2",
-  },
-  {
-    id: "calle-principal",
-    title: "Lotes sobre calle principal",
-    copy: "Ubicaciones con mayor exposición dentro del proyecto, con precio definido de $95,000 MXN.",
-    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
-    link: "/secciones/calle-principal",
-  },
-  {
-    id: "mision",
-    title: "Misión",
-    copy: activeTenant.mission,
-    image: "",
-    link: "/secciones/mision",
-  },
-  {
-    id: "vision",
-    title: "Visión",
-    copy: activeTenant.vision,
-    image: "",
-    link: "/secciones/vision",
-  },
-  {
-    id: "valores",
-    title: "Valores clave",
-    copy: activeTenant.values.join(", "),
-    image: "",
-    link: "/secciones/claridad-documental",
-  },
-  {
-    id: "ubicacion-contacto",
-    title: "Ubicación y contacto",
-    copy: `${activeTenant.contact.address}. WhatsApp: ${activeTenant.contact.whatsapp}`,
-    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1300&q=80",
-    link: "/#contacto",
-  },
-];
-
-function loadEditableContent() {
-  if (typeof window === "undefined") return editableContentDefaults;
-
-  try {
-    const saved = localStorage.getItem("cbr-editable-content-v1");
-    const parsed = saved ? (JSON.parse(saved) as EditableSection[]) : editableContentDefaults;
-    return parsed.filter((section) => section.id !== "hero");
-  } catch {
-    return editableContentDefaults;
-  }
-}
-
 function ContentEditorView() {
-  const [sections, setSections] = useState<EditableSection[]>(loadEditableContent);
+  const [sections, setSections] = useState<EditableSection[]>(editableContentDefaults);
   const [saved, setSaved] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [uploadingSectionId, setUploadingSectionId] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetch("/api/content", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data: { sections?: EditableSection[] }) => {
+        if (!isMounted) return;
+        setSections(mergeEditableSections(data.sections ?? []));
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setError("No pude cargar contenido desde Supabase. Mostrando contenido base.");
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const updateSection = (id: string, key: keyof EditableSection, value: string) => {
     setSections((current) =>
@@ -740,9 +698,58 @@ function ContentEditorView() {
     setSaved(false);
   };
 
-  const saveContent = () => {
-    localStorage.setItem("cbr-editable-content-v1", JSON.stringify(sections));
-    setSaved(true);
+  const saveContent = async () => {
+    setIsSaving(true);
+    setSaved(false);
+    setError("");
+
+    try {
+      const response = await fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sections }),
+      });
+
+      if (!response.ok) throw new Error("Save failed");
+      const data = (await response.json()) as { sections?: EditableSection[]; stored?: boolean };
+      setSections(mergeEditableSections(data.sections ?? sections));
+      setSaved(true);
+
+      if (!data.stored) {
+        setError("Supabase no está configurado todavía; no se pudo publicar de forma persistente.");
+      }
+    } catch {
+      setError("No pude guardar en Supabase. Revisa tabla content_sections y permisos.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const uploadImage = async (sectionId: string, file?: File) => {
+    if (!file) return;
+
+    setUploadingSectionId(sectionId);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("sectionId", sectionId);
+
+      const response = await fetch("/api/content/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+      const data = (await response.json()) as { imageUrl?: string };
+      if (!data.imageUrl) throw new Error("Missing image url");
+      updateSection(sectionId, "image", data.imageUrl);
+    } catch {
+      setError("No pude subir la imagen. Revisa que el bucket cbr-content exista en Supabase.");
+    } finally {
+      setUploadingSectionId("");
+    }
   };
 
   return (
@@ -751,21 +758,27 @@ function ContentEditorView() {
         <div>
           <p className="text-lg font-semibold">Editor de frontend</p>
           <p className="mt-1 text-sm text-white/42">
-            Base para editar textos, enlaces, fotos y subpáginas. El hero queda bloqueado para proteger la primera impresión.
+            Edita textos, enlaces, fotos y subpáginas. El hero queda bloqueado para proteger la primera impresión.
           </p>
         </div>
         <button
           onClick={saveContent}
+          disabled={isSaving || isLoading}
           className="inline-flex min-h-10 items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#07111f]"
         >
           <SquarePen size={16} />
-          Guardar cambios
+          {isSaving ? "Guardando..." : "Guardar y publicar"}
         </button>
       </div>
 
       {saved && (
         <div className="border border-emerald-300/25 bg-emerald-300/10 p-4 text-sm text-emerald-100">
-          Cambios guardados localmente. La siguiente etapa es persistirlos en Supabase para que publiquen en producción.
+          Cambios guardados en Supabase. El sitio público los leerá automáticamente.
+        </div>
+      )}
+      {error && (
+        <div className="border border-rose-300/25 bg-rose-300/10 p-4 text-sm text-rose-100">
+          {error}
         </div>
       )}
 
@@ -781,6 +794,20 @@ function ContentEditorView() {
               )}
             </div>
             <div className="grid gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 border border-[#d8b86f]/35 px-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#f3d99a] transition hover:bg-[#d8b86f] hover:text-[#07111f]">
+                  <ImageIcon size={15} />
+                  {uploadingSectionId === section.id ? "Subiendo..." : "Cambiar foto"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={Boolean(uploadingSectionId)}
+                    onChange={(event) => uploadImage(section.id, event.target.files?.[0])}
+                  />
+                </label>
+                <span className="text-xs text-white/35">JPG, PNG o WebP. Se publica al guardar.</span>
+              </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="grid gap-2 text-sm text-white/58">
                   Título
@@ -799,15 +826,6 @@ function ContentEditorView() {
                   />
                 </label>
               </div>
-              <label className="grid gap-2 text-sm text-white/58">
-                URL de imagen
-                <input
-                  value={section.image}
-                  onChange={(event) => updateSection(section.id, "image", event.target.value)}
-                  className="min-h-11 border border-white/10 bg-[#06111f] px-3 text-white outline-none focus:border-[#d8b86f]"
-                  placeholder="https://..."
-                />
-              </label>
               <label className="grid gap-2 text-sm text-white/58">
                 Texto
                 <textarea

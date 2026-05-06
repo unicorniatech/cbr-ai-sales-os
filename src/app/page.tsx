@@ -26,6 +26,11 @@ import {
 import { AdvisorChat } from "./components/advisor-chat";
 import { captureLead } from "./lib/lead-store";
 import { activeTenant, formatCurrency } from "./config/tenants";
+import {
+  editableContentDefaults,
+  getEditableSectionMap,
+  type EditableSection,
+} from "./lib/editable-content";
 
 const brand = activeTenant.brand;
 const slogan = activeTenant.slogan;
@@ -34,6 +39,8 @@ const storySteps = activeTenant.storySteps;
 const propertyTypes = activeTenant.propertyTypes;
 const trustItems = activeTenant.trustItems;
 const contact = activeTenant.contact;
+const defaultContentMap = getEditableSectionMap(editableContentDefaults);
+type ContentMap = typeof defaultContentMap;
 
 const heroVideoEndProgress = 0.98;
 const heroVideoSafeTail = 0.08;
@@ -342,7 +349,9 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
   );
 }
 
-function FeaturedProject() {
+function FeaturedProject({ contentMap }: { contentMap: ContentMap }) {
+  const section = contentMap.proyecto;
+
   return (
     <section id="inicio" className="relative overflow-hidden bg-[#030a16] py-28 sm:py-36">
       <div className="absolute inset-0 bg-[linear-gradient(180deg,#030a16_0%,#071321_52%,#030a16_100%)]" />
@@ -353,10 +362,10 @@ function FeaturedProject() {
               Proyecto destacado
             </p>
             <h2 className="max-w-3xl text-balance text-5xl font-semibold leading-[1.02] text-white sm:text-7xl">
-              {project.name}
+              {section.title}
             </h2>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-white/66">
-              {activeTenant.subtitle}
+              {section.copy}
             </p>
             <div className="mt-10 grid gap-5 text-white/78 sm:grid-cols-2">
               {[
@@ -374,7 +383,7 @@ function FeaturedProject() {
               ))}
             </div>
             <Link
-              href="/secciones/cumbres-de-bendicion"
+              href={section.link}
               className="mt-10 inline-flex items-center gap-3 border border-[#d8b86f]/45 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#f3d99a] transition hover:bg-[#d8b86f] hover:text-[#07111f]"
             >
               Ver detalles del proyecto
@@ -387,8 +396,7 @@ function FeaturedProject() {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage:
-                  "url(https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=82)",
+                  backgroundImage: `url(${section.image})`,
               }}
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.12),rgba(3,10,22,0.86))]" />
@@ -419,7 +427,11 @@ function FeaturedProject() {
   );
 }
 
-function MissionVisionSection() {
+function MissionVisionSection({ contentMap }: { contentMap: ContentMap }) {
+  const mission = contentMap.mision;
+  const vision = contentMap.vision;
+  const values = contentMap.valores;
+
   return (
     <section className="bg-[#071321] py-28 sm:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -430,8 +442,8 @@ function MissionVisionSection() {
         />
         <div className="mt-16 grid gap-6 lg:grid-cols-2">
           {[
-            ["Misión", activeTenant.mission, "/secciones/mision"],
-            ["Visión", activeTenant.vision, "/secciones/vision"],
+            [mission.title, mission.copy, mission.link],
+            [vision.title, vision.copy, vision.link],
           ].map(([title, copy, href], index) => (
             <Reveal key={title} delay={index * 0.08}>
               <article className="border border-white/10 bg-white/[0.035] p-7 sm:p-9">
@@ -446,7 +458,7 @@ function MissionVisionSection() {
           ))}
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {activeTenant.values.map((value, index) => (
+          {values.copy.split(",").map((value, index) => (
             <Reveal key={value} delay={index * 0.04}>
               <div className="border-t border-[#d8b86f]/35 pt-5">
                 <ShieldCheck className="mb-4 text-[#d8b86f]" size={22} />
@@ -460,7 +472,19 @@ function MissionVisionSection() {
   );
 }
 
-function PropertyCards() {
+function PropertyCards({ contentMap }: { contentMap: ContentMap }) {
+  const editablePropertyTypes = propertyTypes.map((item, index) => {
+    const ids = ["terrenos-200m2", "calle-principal", "terrenos-patrimoniales", "claridad-documental"];
+    const section = contentMap[ids[index]];
+    return {
+      ...item,
+      title: section.title,
+      copy: section.copy,
+      image: section.image,
+      link: section.link,
+    };
+  });
+
   return (
     <section id="terrenos" className="bg-[#030a16] py-28 sm:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -470,10 +494,10 @@ function PropertyCards() {
           copy="Por ahora el portafolio público se enfoca únicamente en terrenos dentro del proyecto Cumbres de Bendición."
         />
         <div className="mt-16 grid gap-5 md:grid-cols-2">
-          {propertyTypes.map((item, index) => (
+          {editablePropertyTypes.map((item, index) => (
             <Reveal key={item.title} delay={index * 0.06}>
               <article className="group relative min-h-[430px] overflow-hidden border border-white/10 bg-white/[0.035]">
-                <Link href={`/secciones/${index === 0 ? "lotes-200m2" : index === 1 ? "calle-principal" : index === 2 ? "terrenos-patrimoniales" : "claridad-documental"}`} className="absolute inset-0 z-10" aria-label={`Ver más sobre ${item.title}`} />
+                <Link href={item.link} className="absolute inset-0 z-10" aria-label={`Ver más sobre ${item.title}`} />
                 <div
                   className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-105"
                   style={{ backgroundImage: `url(${item.image})` }}
@@ -499,7 +523,9 @@ function PropertyCards() {
   );
 }
 
-function LocationSection() {
+function LocationSection({ contentMap }: { contentMap: ContentMap }) {
+  const locationContent = contentMap["ubicacion-contacto"];
+
   return (
     <section className="relative overflow-hidden bg-[#071321] py-28 sm:py-36">
       <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_70%_40%,rgba(216,184,111,0.18),transparent_36%)]" />
@@ -521,14 +547,13 @@ function LocationSection() {
                 className="absolute inset-0 bg-cover bg-center"
                 style={{
                   backgroundImage:
-                    "url(https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1300&q=80)",
+                    `url(${locationContent.image})`,
                 }}
               />
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,19,33,0.72),rgba(7,19,33,0.18))]" />
               <div className="absolute bottom-0 left-0 max-w-xl p-8">
                 <p className="text-lg leading-8 text-white/76">
-                  {project.location} ofrece un punto de entrada claro
-                  para compradores que buscan terreno, orden y precio definido.
+                  {locationContent.copy}
                 </p>
               </div>
             </div>
@@ -720,16 +745,33 @@ function LeadForm() {
 
 export default function Home() {
   useLenis();
+  const [contentMap, setContentMap] = useState<ContentMap>(defaultContentMap);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetch("/api/content", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data: { sections?: EditableSection[] }) => {
+        if (!isMounted) return;
+        setContentMap(getEditableSectionMap(data.sections ?? editableContentDefaults));
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#030a16] text-white">
       <AnimatePresence>
         <StickyHero />
       </AnimatePresence>
-      <FeaturedProject />
-      <MissionVisionSection />
-      <PropertyCards />
-      <LocationSection />
+      <FeaturedProject contentMap={contentMap} />
+      <MissionVisionSection contentMap={contentMap} />
+      <PropertyCards contentMap={contentMap} />
+      <LocationSection contentMap={contentMap} />
       <TrustSection />
       <LeadForm />
       <AdvisorChat />
