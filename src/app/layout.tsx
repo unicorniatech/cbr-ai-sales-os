@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Grupo Inmobiliario Castrejón Rodríguez",
   description:
-    "Terrenos, casas e inversiones en Morelos con claridad documental y trato directo.",
+    "Terrenos en Jojutla, Morelos con claridad documental, seguridad jurídica y trato directo.",
   icons: {
     icon: [
       { url: "/brand/CBR-LOGO.webp", type: "image/webp" },

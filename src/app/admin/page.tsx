@@ -11,6 +11,7 @@ import {
   CalendarClock,
   CircleDollarSign,
   Flame,
+  ImageIcon,
   LayoutDashboard,
   ListFilter,
   MessageCircle,
@@ -18,12 +19,14 @@ import {
   RefreshCw,
   Search,
   Settings,
+  SquarePen,
   ShieldCheck,
   Snowflake,
   Sparkles,
   UsersRound,
 } from "lucide-react";
 import { fetchRemoteLeads, getAllLeads, type StoredLead } from "../lib/lead-store";
+import { activeTenant } from "../config/tenants";
 
 type LeadTemperature = "hot" | "warm" | "cold";
 type LeadStage = "Nuevo" | "Contactado" | "Calificado" | "Visita" | "Apartado";
@@ -332,7 +335,7 @@ function RealtimeReadyPanel() {
   );
 }
 
-type Tab = "dashboard" | "leads" | "pipeline" | "tasks";
+type Tab = "dashboard" | "leads" | "pipeline" | "tasks" | "content";
 
 function DashboardView({
   leads,
@@ -649,6 +652,151 @@ function TasksView() {
   );
 }
 
+type EditableSection = {
+  id: string;
+  title: string;
+  copy: string;
+  image: string;
+  link: string;
+};
+
+const editableContentDefaults: EditableSection[] = [
+  {
+    id: "hero",
+    title: activeTenant.brand,
+    copy: activeTenant.slogan,
+    image: "/videos/CBR-intro-poster.jpg",
+    link: "/",
+  },
+  {
+    id: "proyecto",
+    title: activeTenant.project.name,
+    copy: activeTenant.subtitle,
+    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=82",
+    link: "/secciones/cumbres-de-bendicion",
+  },
+  {
+    id: "mision",
+    title: "Misión",
+    copy: activeTenant.mission,
+    image: "",
+    link: "/secciones/mision",
+  },
+  {
+    id: "vision",
+    title: "Visión",
+    copy: activeTenant.vision,
+    image: "",
+    link: "/secciones/vision",
+  },
+];
+
+function loadEditableContent() {
+  if (typeof window === "undefined") return editableContentDefaults;
+
+  try {
+    const saved = localStorage.getItem("cbr-editable-content-v1");
+    return saved ? (JSON.parse(saved) as EditableSection[]) : editableContentDefaults;
+  } catch {
+    return editableContentDefaults;
+  }
+}
+
+function ContentEditorView() {
+  const [sections, setSections] = useState<EditableSection[]>(loadEditableContent);
+  const [saved, setSaved] = useState(false);
+
+  const updateSection = (id: string, key: keyof EditableSection, value: string) => {
+    setSections((current) =>
+      current.map((section) => (section.id === id ? { ...section, [key]: value } : section)),
+    );
+    setSaved(false);
+  };
+
+  const saveContent = () => {
+    localStorage.setItem("cbr-editable-content-v1", JSON.stringify(sections));
+    setSaved(true);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 border border-white/10 bg-white/[0.025] p-5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-lg font-semibold">Editor de frontend</p>
+          <p className="mt-1 text-sm text-white/42">
+            Base para que el cliente edite textos, enlaces y fotos por sección. Después se conecta a Supabase Storage/CMS.
+          </p>
+        </div>
+        <button
+          onClick={saveContent}
+          className="inline-flex min-h-10 items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#07111f]"
+        >
+          <SquarePen size={16} />
+          Guardar cambios
+        </button>
+      </div>
+
+      {saved && (
+        <div className="border border-emerald-300/25 bg-emerald-300/10 p-4 text-sm text-emerald-100">
+          Cambios guardados localmente. La siguiente etapa es persistirlos en Supabase para que publiquen en producción.
+        </div>
+      )}
+
+      <div className="grid gap-5">
+        {sections.map((section) => (
+          <article key={section.id} className="grid gap-5 border border-white/10 bg-white/[0.025] p-5 lg:grid-cols-[220px_1fr]">
+            <div className="flex min-h-36 items-center justify-center overflow-hidden border border-white/10 bg-[#06111f]">
+              {section.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={section.image} alt={section.title} className="h-full w-full object-cover" />
+              ) : (
+                <ImageIcon className="text-white/30" size={34} />
+              )}
+            </div>
+            <div className="grid gap-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="grid gap-2 text-sm text-white/58">
+                  Título
+                  <input
+                    value={section.title}
+                    onChange={(event) => updateSection(section.id, "title", event.target.value)}
+                    className="min-h-11 border border-white/10 bg-[#06111f] px-3 text-white outline-none focus:border-[#d8b86f]"
+                  />
+                </label>
+                <label className="grid gap-2 text-sm text-white/58">
+                  Link de subpágina
+                  <input
+                    value={section.link}
+                    onChange={(event) => updateSection(section.id, "link", event.target.value)}
+                    className="min-h-11 border border-white/10 bg-[#06111f] px-3 text-white outline-none focus:border-[#d8b86f]"
+                  />
+                </label>
+              </div>
+              <label className="grid gap-2 text-sm text-white/58">
+                URL de imagen
+                <input
+                  value={section.image}
+                  onChange={(event) => updateSection(section.id, "image", event.target.value)}
+                  className="min-h-11 border border-white/10 bg-[#06111f] px-3 text-white outline-none focus:border-[#d8b86f]"
+                  placeholder="https://..."
+                />
+              </label>
+              <label className="grid gap-2 text-sm text-white/58">
+                Texto
+                <textarea
+                  value={section.copy}
+                  onChange={(event) => updateSection(section.id, "copy", event.target.value)}
+                  className="min-h-28 resize-none border border-white/10 bg-[#06111f] px-3 py-3 text-white outline-none focus:border-[#d8b86f]"
+                />
+              </label>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [selectedLeadId, setSelectedLeadId] = useState(leads[0].id);
@@ -697,6 +845,7 @@ export default function AdminDashboard() {
     { id: "leads", label: "Leads", icon: UsersRound },
     { id: "pipeline", label: "Pipeline", icon: ListFilter },
     { id: "tasks", label: "Tareas", icon: CalendarClock },
+    { id: "content", label: "Contenido", icon: SquarePen },
   ];
 
   return (
@@ -781,6 +930,7 @@ export default function AdminDashboard() {
         )}
         {activeTab === "pipeline" && <PipelineView leads={allLeads} />}
         {activeTab === "tasks" && <TasksView />}
+        {activeTab === "content" && <ContentEditorView />}
       </div>
     </main>
   );

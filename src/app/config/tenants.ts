@@ -1,5 +1,4 @@
 import {
-  Home as HomeIcon,
   Landmark,
   Ruler,
   Trees,
@@ -48,6 +47,15 @@ export type TenantConfig = {
     fallback: string;
   };
   project: ProjectConfig;
+  contact: {
+    address: string;
+    whatsapp: string;
+    whatsappHref: string;
+  };
+  mission: string;
+  vision: string;
+  values: string[];
+  subtitle: string;
   storySteps: string[];
   propertyTypes: PropertyTypeConfig[];
   trustItems: string[];
@@ -84,6 +92,18 @@ export const tenants: Record<TenantId, TenantConfig> = {
     brand: "Grupo Inmobiliario Castrejón Rodríguez",
     slogan: "Tu inversión segura con la seriedad que nos distingue",
     logoUrl: "/brand/CBR-LOGO.webp",
+    contact: {
+      address: "Calle 20 de noviembre, colonia Lázaro Cárdenas, Jojutla, Morelos",
+      whatsapp: "+52 1 777 266 2208",
+      whatsappHref: "https://wa.me/5217772662208",
+    },
+    mission:
+      "Brindar soluciones integrales en el sector inmobiliario, facilitando la adquisición de terrenos mediante un servicio profesional, transparente y eficiente que garantice la seguridad jurídica y financiera de nuestros clientes.",
+    vision:
+      "Posicionarnos como la inmobiliaria líder en la región, reconocida por la calidad de nuestros desarrollos, la seriedad en nuestras operaciones y el compromiso de generar valor y plusvalía en cada proyecto.",
+    values: ["Transparencia", "Seguridad Jurídica", "Honestidad", "Compromiso con el Patrimonio Familiar"],
+    subtitle:
+      "En Castrejón Bienes Raíces, entendemos que tu inversión es el fruto de tu esfuerzo. Por ello, garantizamos claridad absoluta en cada paso del proceso, con documentación disponible para revisión y un trato directo basado en la legalidad y la confianza. No solo vendemos tierra, aseguramos tu futuro.",
     agent: {
       name: "Asesor IA CBR",
       role: "Asesor inmobiliario digital",
@@ -91,43 +111,43 @@ export const tenants: Record<TenantId, TenantConfig> = {
       greeting:
         "¡Hola! Soy tu asesor virtual de CBR. Puedo orientarte sobre precios, ubicación, medidas, documentación y planes de pago.",
       fallback:
-        "Puedo ayudarte con precios, ubicación, medidas, claridad documental o tomar tus datos para que un asesor te contacte.",
+        "Puedo ayudarte con precios, ubicación, medidas, claridad documental o tomar tus datos para que un asesor te contacte por WhatsApp.",
     },
     project: cbrProject,
     storySteps: [
       "Convierte tu terreno en tu futuro hogar",
-      "Terrenos, casas e inversiones en Morelos",
+      "Terrenos limpios y delimitados en Morelos",
       "Compra con claridad, documentación y trato directo",
       "Grupo Inmobiliario Castrejón Rodríguez",
     ],
     propertyTypes: [
       {
-        title: "Lotes residenciales",
-        copy: "Superficies de 200 m2 para construir a tu ritmo, con pagos mensuales accesibles.",
+        title: "Lotes de 200 m2",
+        copy: "Terrenos de 10x20 m, totalmente limpios y delimitados para iniciar patrimonio con claridad.",
         icon: Ruler,
         image:
           "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
       },
       {
-        title: "Casas en desarrollo",
-        copy: "Opciones habitacionales para compradores que buscan avanzar con claridad y trato directo.",
-        icon: HomeIcon,
+        title: "Lotes sobre calle principal",
+        copy: "Ubicaciones con mayor exposición dentro del proyecto, con precio definido de $95,000 MXN.",
+        icon: Landmark,
         image:
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+          "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
       },
       {
         title: "Terrenos patrimoniales",
-        copy: "Ubicaciones con potencial en Morelos para familias, inversionistas y constructores.",
+        copy: "Oportunidades en Jojutla para familias que buscan invertir con trato directo y documentación revisable.",
         icon: Trees,
         image:
           "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80",
       },
       {
-        title: "Oportunidades de inversión",
-        copy: "Activos inmobiliarios con información clara para decidir con confianza.",
+        title: "Proyecto delimitado",
+        copy: "Terrenos claros, medibles y listos para revisión con acompañamiento profesional durante el proceso.",
         icon: Landmark,
         image:
-          "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+          "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=82",
       },
     ],
     trustItems: [
@@ -137,18 +157,6 @@ export const tenants: Record<TenantId, TenantConfig> = {
       "Pagos claros, enganches definidos y seguimiento formal",
     ],
     knowledgeBase: [
-      {
-        id: "membership",
-        keywords: ["membresia", "membresía", "tanda", "ahorro", "100", "cien", "mensual", "club"],
-        answer:
-          "La Membresía de Patrimonio OS no es para consumir contenido: es para crear patrimonio. Empiezas con aportaciones pequeñas, construyes disciplina, aprendes, desbloqueas oportunidades y avanzas hacia un terreno con guía local, mexicana y asistida por IA. La agencia paga la plataforma; el comprador usa la experiencia para comprometerse con su futuro.",
-      },
-      {
-        id: "terrain-vision",
-        keywords: ["enchula", "enchúlame", "foto", "imagen", "terreno", "visualizar", "diseno", "diseño"],
-        answer:
-          "Podemos ayudarte a imaginar el potencial del terreno con una visualización: más verde, más limpio, con casa económica, iluminación, parque o fachada. Es inspiración visual, no promesa de obra ni aval técnico.",
-      },
       {
         id: "pricing",
         keywords: ["precio", "cuesta", "costo", "vale", "mensualidad", "enganche"],
@@ -186,9 +194,7 @@ export const tenants: Record<TenantId, TenantConfig> = {
       },
     ],
     quickActions: [
-      { label: "Membresía", prompt: "Explícame la Membresía de Patrimonio OS." },
       { label: "Precios", prompt: "Quiero saber precios, enganche y mensualidades." },
-      { label: "Enchúlame", prompt: "Quiero enchular una foto de mi terreno." },
       { label: "Ubicación", prompt: "Donde esta ubicado Cumbres de Bendición?" },
       { label: "Documentación", prompt: "Que claridad documental ofrecen?" },
       { label: "Calcular plan", prompt: "Calcula mi plan de pagos." },

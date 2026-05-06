@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   AnimatePresence,
   motion,
@@ -32,6 +33,7 @@ const project = activeTenant.project;
 const storySteps = activeTenant.storySteps;
 const propertyTypes = activeTenant.propertyTypes;
 const trustItems = activeTenant.trustItems;
+const contact = activeTenant.contact;
 
 const heroVideoEndProgress = 0.98;
 const heroVideoSafeTail = 0.08;
@@ -239,7 +241,7 @@ function StickyHero() {
 
         <HeroText progress={scrollYProgress} range={[0.02, 0.06, 0.22, 0.28]}>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.42em] text-[#f3d99a]">
-            Morelos real estate
+            Terrenos en Morelos
           </p>
           <h1 className="text-balance text-5xl font-semibold leading-[0.98] text-white sm:text-7xl lg:text-8xl">
             {storySteps[0]}
@@ -284,10 +286,10 @@ function StickyHero() {
           className="absolute inset-x-0 bottom-10 z-20 flex flex-col items-center justify-center gap-3 px-6 sm:flex-row"
         >
           <a
-            href="#propiedades"
+            href="#terrenos"
             className="inline-flex min-h-12 w-full max-w-xs items-center justify-center gap-3 bg-[#d8b86f] px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#07111f] transition hover:bg-[#f3d99a] sm:w-auto"
           >
-            Ver propiedades
+            Ver terrenos
             <ArrowRight size={18} aria-hidden="true" />
           </a>
           <a
@@ -354,8 +356,7 @@ function FeaturedProject() {
               {project.name}
             </h2>
             <p className="mt-7 max-w-2xl text-lg leading-8 text-white/66">
-              {project.description} Una oportunidad patrimonial en Jojutla con
-              enganche accesible y mensualidades pensadas para avanzar sin ruido.
+              {activeTenant.subtitle}
             </p>
             <div className="mt-10 grid gap-5 text-white/78 sm:grid-cols-2">
               {[
@@ -372,6 +373,13 @@ function FeaturedProject() {
                 </div>
               ))}
             </div>
+            <Link
+              href="/secciones/cumbres-de-bendicion"
+              className="mt-10 inline-flex items-center gap-3 border border-[#d8b86f]/45 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#f3d99a] transition hover:bg-[#d8b86f] hover:text-[#07111f]"
+            >
+              Ver detalles del proyecto
+              <ArrowRight size={16} />
+            </Link>
           </div>
         </Reveal>
         <Reveal delay={0.12}>
@@ -411,19 +419,61 @@ function FeaturedProject() {
   );
 }
 
-function PropertyCards() {
+function MissionVisionSection() {
   return (
-    <section id="propiedades" className="bg-[#030a16] py-28 sm:py-36">
+    <section className="bg-[#071321] py-28 sm:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <SectionIntro
-          eyebrow="Portafolio inicial"
-          title="Propiedades para vivir, construir e invertir con perspectiva."
-          copy="La experiencia está preparada para crecer hacia inventario dinámico, CRM, Supabase y seguimiento con asesor IA sin rehacer la interfaz."
+          eyebrow="Identidad"
+          title="Seriedad, legalidad y compromiso con tu patrimonio familiar."
+          copy="Grupo Inmobiliario Castrejón Rodríguez trabaja con un proceso claro para que cada comprador entienda qué adquiere, cómo paga y qué documentación puede revisar."
+        />
+        <div className="mt-16 grid gap-6 lg:grid-cols-2">
+          {[
+            ["Misión", activeTenant.mission, "/secciones/mision"],
+            ["Visión", activeTenant.vision, "/secciones/vision"],
+          ].map(([title, copy, href], index) => (
+            <Reveal key={title} delay={index * 0.08}>
+              <article className="border border-white/10 bg-white/[0.035] p-7 sm:p-9">
+                <p className="text-xs uppercase tracking-[0.26em] text-[#d8b86f]">{title}</p>
+                <p className="mt-5 text-lg leading-8 text-white/70">{copy}</p>
+                <a href={href} className="mt-7 inline-flex items-center gap-2 text-sm text-[#f3d99a]">
+                  Leer más
+                  <ChevronRight size={16} />
+                </a>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {activeTenant.values.map((value, index) => (
+            <Reveal key={value} delay={index * 0.04}>
+              <div className="border-t border-[#d8b86f]/35 pt-5">
+                <ShieldCheck className="mb-4 text-[#d8b86f]" size={22} />
+                <p className="text-lg font-medium text-white">{value}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PropertyCards() {
+  return (
+    <section id="terrenos" className="bg-[#030a16] py-28 sm:py-36">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <SectionIntro
+          eyebrow="Terrenos disponibles"
+          title="Lotes limpios, delimitados y con precio claro."
+          copy="Por ahora el portafolio público se enfoca únicamente en terrenos dentro del proyecto Cumbres de Bendición."
         />
         <div className="mt-16 grid gap-5 md:grid-cols-2">
           {propertyTypes.map((item, index) => (
             <Reveal key={item.title} delay={index * 0.06}>
               <article className="group relative min-h-[430px] overflow-hidden border border-white/10 bg-white/[0.035]">
+                <Link href={`/secciones/${index === 0 ? "lotes-200m2" : index === 1 ? "calle-principal" : index === 2 ? "terrenos-patrimoniales" : "claridad-documental"}`} className="absolute inset-0 z-10" aria-label={`Ver más sobre ${item.title}`} />
                 <div
                   className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-105"
                   style={{ backgroundImage: `url(${item.image})` }}
@@ -435,6 +485,10 @@ function PropertyCards() {
                   <p className="mt-4 max-w-xl text-base leading-7 text-white/68">
                     {item.copy}
                   </p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm text-[#f3d99a]">
+                    Más información
+                    <ChevronRight size={16} />
+                  </span>
                 </div>
               </article>
             </Reveal>
@@ -456,7 +510,7 @@ function LocationSection() {
               Ubicación
             </p>
             <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl">
-              Jojutla, Morelos: vida local, conexión y plusvalía regional.
+              Jojutla, Morelos: ubicación clara para invertir en terreno.
             </h2>
           </div>
         </Reveal>
@@ -473,7 +527,7 @@ function LocationSection() {
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,19,33,0.72),rgba(7,19,33,0.18))]" />
               <div className="absolute bottom-0 left-0 max-w-xl p-8">
                 <p className="text-lg leading-8 text-white/76">
-                  Ampliación Lázaro Cárdenas ofrece un punto de entrada claro
+                  {project.location} ofrece un punto de entrada claro
                   para compradores que buscan terreno, orden y precio definido.
                 </p>
               </div>
@@ -547,10 +601,9 @@ function AdvisorSection() {
                 Un asistente comercial para resolver dudas, calificar leads y
                 acelerar el siguiente paso.
               </h2>
-              <p className="mt-7 max-w-3xl text-lg leading-8 text-white/66">
-                La interfaz ya reserva el espacio para integrar el agente
-                después: preguntas sobre precios, ubicación, documentación,
-                disponibilidad y seguimiento personalizado.
+            <p className="mt-7 max-w-3xl text-lg leading-8 text-white/66">
+                El asesor digital está preparado para responder preguntas sobre
+                precios, ubicación, medidas, documentación y próximos pasos de contacto.
               </p>
             </div>
           </div>
@@ -562,7 +615,7 @@ function AdvisorSection() {
 
 function LeadForm() {
   const interestOptions = useMemo(
-    () => ["Terreno", "Casa", "Inversión", activeTenant.project.name],
+    () => ["Terreno", activeTenant.project.name, "Lote sobre calle principal", "Documentación"],
     [],
   );
   const [name, setName] = useState("");
@@ -621,9 +674,18 @@ function LeadForm() {
               Agenda una conversación seria sobre tu próxima inversión.
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-8 text-white/66">
-              Déjanos tus datos y un asesor te contactará. Los leads se guardan
-              localmente y están listos para conectarse a tu CRM o Supabase.
+              Déjanos tus datos o escríbenos directamente por WhatsApp. Atendemos
+              desde {contact.address}.
             </p>
+            <a
+              href={contact.whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-8 inline-flex items-center gap-3 border border-[#d8b86f]/45 px-5 py-3 text-sm font-semibold text-[#f3d99a] transition hover:bg-[#d8b86f] hover:text-[#07111f]"
+            >
+              WhatsApp: {contact.whatsapp}
+              <MessageCircle size={18} />
+            </a>
           </div>
         </Reveal>
         <Reveal delay={0.1}>
@@ -697,6 +759,7 @@ export default function Home() {
         <StickyHero />
       </AnimatePresence>
       <FeaturedProject />
+      <MissionVisionSection />
       <PropertyCards />
       <LocationSection />
       <TrustSection />
@@ -708,6 +771,7 @@ export default function Home() {
           <div>
             <p className="font-medium text-white">{brand}</p>
             <p className="mt-1 text-sm">{slogan}</p>
+            <p className="mt-1 text-sm">{contact.address}</p>
           </div>
           <div className="flex items-center gap-4 text-sm">
             <span className="inline-flex items-center gap-2">
