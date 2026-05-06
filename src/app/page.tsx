@@ -24,6 +24,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { AdvisorChat } from "./components/advisor-chat";
+import { StructuredData } from "./components/structured-data";
 import { captureLead } from "./lib/lead-store";
 import { activeTenant, formatCurrency } from "./config/tenants";
 import {
@@ -768,6 +769,7 @@ export default function Home() {
       <AnimatePresence>
         <StickyHero />
       </AnimatePresence>
+      <StructuredData />
       <FeaturedProject contentMap={contentMap} />
       <MissionVisionSection contentMap={contentMap} />
       <PropertyCards contentMap={contentMap} />

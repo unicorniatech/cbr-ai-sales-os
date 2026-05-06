@@ -23,6 +23,7 @@ create table if not exists public.content_sections (
   section_id text not null,
   title text not null,
   copy text not null default '',
+  page_copy text not null default '',
   image_url text not null default '',
   media jsonb not null default '[]'::jsonb,
   link text not null default '',
@@ -37,3 +38,9 @@ create index if not exists content_sections_tenant_sort_idx
 insert into storage.buckets (id, name, public)
 values ('cbr-content', 'cbr-content', true)
 on conflict (id) do update set public = true;
+
+alter table public.content_sections
+add column if not exists media jsonb not null default '[]'::jsonb;
+
+alter table public.content_sections
+add column if not exists page_copy text not null default '';

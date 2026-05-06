@@ -92,7 +92,7 @@ export function SectionClientPage({ slug }: { slug: string }) {
         <div className="mt-16 border-y border-white/10 py-14">
           <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[#d8b86f]">Información</p>
           <h1 className="mt-5 text-balance text-5xl font-semibold leading-tight sm:text-7xl">{content.title}</h1>
-          <p className="mt-8 text-lg leading-8 text-white/68">{content.copy}</p>
+          <p className="mt-8 text-lg leading-8 text-white/68">{content.pageCopy || content.copy}</p>
         </div>
         {activeMedia && (
           <div className="mt-10">

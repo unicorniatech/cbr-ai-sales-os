@@ -13,9 +13,41 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cbr-ai-sales-os.vercel.app"),
   title: "Grupo Inmobiliario Castrejón Rodríguez",
   description:
     "Terrenos en Jojutla, Morelos con claridad documental, seguridad jurídica y trato directo.",
+  keywords: [
+    "terrenos en Jojutla",
+    "terrenos en Morelos",
+    "Cumbres de Bendición",
+    "Grupo Inmobiliario Castrejón Rodríguez",
+    "lotes en Jojutla",
+    "terrenos 200 m2",
+  ],
+  openGraph: {
+    title: "Grupo Inmobiliario Castrejón Rodríguez",
+    description:
+      "Terrenos en Jojutla, Morelos con claridad documental, seguridad jurídica y trato directo.",
+    url: "/",
+    siteName: "Grupo Inmobiliario Castrejón Rodríguez",
+    locale: "es_MX",
+    type: "website",
+    images: [
+      {
+        url: "/videos/CBR-intro-poster.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Cumbres de Bendición en Jojutla, Morelos",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Grupo Inmobiliario Castrejón Rodríguez",
+    description: "Terrenos en Jojutla, Morelos con claridad documental y trato directo.",
+    images: ["/videos/CBR-intro-poster.jpg"],
+  },
   icons: {
     icon: [
       { url: "/brand/CBR-LOGO.webp", type: "image/webp" },

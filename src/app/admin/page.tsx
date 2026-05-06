@@ -890,11 +890,19 @@ function ContentEditorView() {
                 </label>
               </div>
               <label className="grid gap-2 text-sm text-white/58">
-                Texto
+                Texto corto en la página principal
                 <textarea
                   value={section.copy}
                   onChange={(event) => updateSection(section.id, "copy", event.target.value)}
                   className="min-h-28 resize-none border border-white/10 bg-[#06111f] px-3 py-3 text-white outline-none focus:border-[#d8b86f]"
+                />
+              </label>
+              <label className="grid gap-2 text-sm text-white/58">
+                Texto amplio de subpágina
+                <textarea
+                  value={section.pageCopy}
+                  onChange={(event) => updateSection(section.id, "pageCopy", event.target.value)}
+                  className="min-h-40 resize-none border border-white/10 bg-[#06111f] px-3 py-3 text-white outline-none focus:border-[#d8b86f]"
                 />
               </label>
               <div className="space-y-3 border-t border-white/10 pt-4">

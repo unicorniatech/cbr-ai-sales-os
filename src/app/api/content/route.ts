@@ -12,6 +12,7 @@ type ContentSectionRow = {
   section_id: string;
   title: string;
   copy: string;
+  page_copy: string | null;
   image_url: string;
   media: EditableSection["media"] | null;
   link: string;
@@ -23,6 +24,7 @@ function toClientSection(row: ContentSectionRow): EditableSection {
     id: row.section_id,
     title: row.title,
     copy: row.copy,
+    pageCopy: row.page_copy ?? row.copy,
     image: row.image_url,
     media: row.media ?? [],
     link: row.link,
@@ -35,6 +37,7 @@ function toRow(section: EditableSection, index: number): ContentSectionRow {
     section_id: section.id,
     title: section.title,
     copy: section.copy,
+    page_copy: section.pageCopy || section.copy,
     image_url: section.image,
     media: section.media ?? [],
     link: section.link,
