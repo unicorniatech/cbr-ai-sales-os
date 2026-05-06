@@ -9,7 +9,9 @@ import {
   Bell,
   Bot,
   CalendarClock,
+  CirclePlus,
   CircleDollarSign,
+  Trash2,
   Flame,
   ImageIcon,
   KeyRound,
@@ -32,6 +34,7 @@ import {
   editableContentDefaults,
   mergeEditableSections,
   type EditableSection,
+  type EditableMedia,
 } from "../lib/editable-content";
 
 type LeadTemperature = "hot" | "warm" | "cold";
@@ -752,6 +755,66 @@ function ContentEditorView() {
     }
   };
 
+  const uploadMedia = async (sectionId: string, file?: File) => {
+    if (!file) return;
+
+    setUploadingSectionId(`${sectionId}-gallery`);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("sectionId", `${sectionId}-gallery`);
+
+      const response = await fetch("/api/content/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+      const data = (await response.json()) as { url?: string; type?: EditableMedia["type"] };
+      if (!data.url || !data.type) throw new Error("Missing media url");
+      const newMedia: EditableMedia = {
+        id: `${sectionId}-${Date.now()}`,
+        url: data.url,
+        type: data.type,
+      };
+
+      setSections((current) =>
+        current.map((section) =>
+          section.id === sectionId
+            ? {
+                ...section,
+                media: [
+                  ...(section.media ?? []),
+                  newMedia,
+                ],
+              }
+            : section,
+        ),
+      );
+      setSaved(false);
+    } catch {
+      setError("No pude subir el archivo. Revisa el bucket cbr-content o el tamaño del video.");
+    } finally {
+      setUploadingSectionId("");
+    }
+  };
+
+  const removeMedia = (sectionId: string, mediaId: string) => {
+    setSections((current) =>
+      current.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              media: (section.media ?? []).filter((item) => item.id !== mediaId),
+            }
+          : section,
+      ),
+    );
+    setSaved(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 border border-white/10 bg-white/[0.025] p-5 md:flex-row md:items-center md:justify-between">
@@ -834,6 +897,53 @@ function ContentEditorView() {
                   className="min-h-28 resize-none border border-white/10 bg-[#06111f] px-3 py-3 text-white outline-none focus:border-[#d8b86f]"
                 />
               </label>
+              <div className="space-y-3 border-t border-white/10 pt-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-white">Carrusel de subpágina</p>
+                    <p className="mt-1 text-xs text-white/38">Agrega tantas fotos o videos como necesites.</p>
+                  </div>
+                  <label className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#07111f]">
+                    <CirclePlus size={15} />
+                    {uploadingSectionId === `${section.id}-gallery` ? "Subiendo..." : "Agregar foto/video"}
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      className="hidden"
+                      disabled={Boolean(uploadingSectionId)}
+                      onChange={(event) => uploadMedia(section.id, event.target.files?.[0])}
+                    />
+                  </label>
+                </div>
+                {(section.media ?? []).length > 0 ? (
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {(section.media ?? []).map((item) => (
+                      <div key={item.id} className="overflow-hidden border border-white/10 bg-[#06111f]">
+                        <div className="aspect-video bg-black">
+                          {item.type === "video" ? (
+                            <video src={item.url} className="h-full w-full object-cover" controls muted />
+                          ) : (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={item.url} alt={section.title} className="h-full w-full object-cover" />
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeMedia(section.id, item.id)}
+                          className="flex min-h-9 w-full items-center justify-center gap-2 text-xs text-rose-100 transition hover:bg-rose-300/10"
+                        >
+                          <Trash2 size={14} />
+                          Quitar
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border border-dashed border-white/15 p-4 text-sm text-white/38">
+                    Aún no hay fotos o videos extra.
+                  </div>
+                )}
+              </div>
             </div>
           </article>
         ))}

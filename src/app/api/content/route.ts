@@ -13,6 +13,7 @@ type ContentSectionRow = {
   title: string;
   copy: string;
   image_url: string;
+  media: EditableSection["media"] | null;
   link: string;
   sort_order: number;
 };
@@ -23,6 +24,7 @@ function toClientSection(row: ContentSectionRow): EditableSection {
     title: row.title,
     copy: row.copy,
     image: row.image_url,
+    media: row.media ?? [],
     link: row.link,
   };
 }
@@ -34,6 +36,7 @@ function toRow(section: EditableSection, index: number): ContentSectionRow {
     title: section.title,
     copy: section.copy,
     image_url: section.image,
+    media: section.media ?? [],
     link: section.link,
     sort_order: index,
   };

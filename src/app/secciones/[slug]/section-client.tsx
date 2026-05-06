@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, MapPin, MessageCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, MapPin, MessageCircle } from "lucide-react";
 import { activeTenant, formatCurrency } from "@/app/config/tenants";
 import {
   editableContentDefaults,
@@ -42,9 +42,24 @@ const defaultPoints: Record<string, string[]> = {
 
 export function SectionClientPage({ slug }: { slug: string }) {
   const [contentMap, setContentMap] = useState(defaultContentMap);
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const sectionId = slugToSectionId[slug] ?? "proyecto";
   const content = contentMap[sectionId] ?? contentMap.proyecto;
+  const media = content.media?.length
+    ? content.media
+    : content.image
+      ? [{ id: `${content.id}-image`, url: content.image, type: "image" as const }]
+      : [];
+  const activeMedia = media[activeMediaIndex] ?? media[0];
   const points = useMemo(() => defaultPoints[slug] ?? defaultPoints["cumbres-de-bendicion"], [slug]);
+
+  const goToPrevious = () => {
+    setActiveMediaIndex((current) => (current === 0 ? media.length - 1 : current - 1));
+  };
+
+  const goToNext = () => {
+    setActiveMediaIndex((current) => (current + 1) % media.length);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -62,6 +77,11 @@ export function SectionClientPage({ slug }: { slug: string }) {
     };
   }, []);
 
+  useEffect(() => {
+    const resetIndex = window.setTimeout(() => setActiveMediaIndex(0), 0);
+    return () => window.clearTimeout(resetIndex);
+  }, [sectionId]);
+
   return (
     <main className="min-h-screen bg-[#030a16] text-white">
       <section className="mx-auto max-w-5xl px-6 py-10 lg:px-10">
@@ -74,10 +94,58 @@ export function SectionClientPage({ slug }: { slug: string }) {
           <h1 className="mt-5 text-balance text-5xl font-semibold leading-tight sm:text-7xl">{content.title}</h1>
           <p className="mt-8 text-lg leading-8 text-white/68">{content.copy}</p>
         </div>
-        {content.image && (
-          <div className="mt-10 h-[360px] overflow-hidden border border-white/10">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={content.image} alt={content.title} className="h-full w-full object-cover" />
+        {activeMedia && (
+          <div className="mt-10">
+            <div className="relative h-[360px] overflow-hidden border border-white/10 bg-black sm:h-[520px]">
+              {activeMedia.type === "video" ? (
+                <video src={activeMedia.url} className="h-full w-full object-contain" controls playsInline />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={activeMedia.url} alt={content.title} className="h-full w-full object-cover" />
+              )}
+              {media.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={goToPrevious}
+                    className="absolute left-4 top-1/2 grid size-11 -translate-y-1/2 place-items-center border border-white/15 bg-[#030a16]/75 text-white backdrop-blur transition hover:text-[#f3d99a]"
+                    aria-label="Imagen anterior"
+                  >
+                    <ChevronLeft size={22} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToNext}
+                    className="absolute right-4 top-1/2 grid size-11 -translate-y-1/2 place-items-center border border-white/15 bg-[#030a16]/75 text-white backdrop-blur transition hover:text-[#f3d99a]"
+                    aria-label="Siguiente imagen"
+                  >
+                    <ChevronRight size={22} />
+                  </button>
+                </>
+              )}
+            </div>
+            {media.length > 1 && (
+              <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+                {media.map((item, index) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveMediaIndex(index)}
+                    className={`h-20 w-28 shrink-0 overflow-hidden border transition ${
+                      activeMediaIndex === index ? "border-[#d8b86f]" : "border-white/10"
+                    }`}
+                    aria-label={`Ver archivo ${index + 1}`}
+                  >
+                    {item.type === "video" ? (
+                      <video src={item.url} className="h-full w-full object-cover" muted />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.url} alt="" className="h-full w-full object-cover" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
         <div className="mt-12 grid gap-4 sm:grid-cols-2">

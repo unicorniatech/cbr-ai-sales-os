@@ -32,9 +32,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!file.type.startsWith("image/")) {
+  if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
     return NextResponse.json(
-      { error: "Only images are allowed" },
+      { error: "Only images and videos are allowed" },
       { status: 400 },
     );
   }
@@ -53,6 +53,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       imageUrl: getSupabasePublicUrl(`${SUPABASE_CONTENT_BUCKET}/${path}`),
+      url: getSupabasePublicUrl(`${SUPABASE_CONTENT_BUCKET}/${path}`),
+      type: file.type.startsWith("video/") ? "video" : "image",
     });
   } catch (error) {
     console.error("Content image upload failed", error);

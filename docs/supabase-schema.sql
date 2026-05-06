@@ -24,6 +24,7 @@ create table if not exists public.content_sections (
   title text not null,
   copy text not null default '',
   image_url text not null default '',
+  media jsonb not null default '[]'::jsonb,
   link text not null default '',
   sort_order integer not null default 0,
   updated_at timestamptz not null default now(),
