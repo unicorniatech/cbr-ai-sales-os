@@ -581,38 +581,6 @@ function TrustSection() {
   );
 }
 
-function AdvisorSection() {
-  return (
-    <section id="asesor-ia" className="relative overflow-hidden bg-[#071321] py-28 sm:py-36">
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(216,184,111,0.16),transparent_28%,rgba(28,82,102,0.2)_70%,transparent)]" />
-      <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
-        <Reveal>
-          <div className="grid gap-12 border-y border-white/12 py-16 lg:grid-cols-[0.72fr_1.28fr]">
-            <div>
-              <span className="inline-flex size-14 items-center justify-center border border-[#d8b86f]/50 bg-[#d8b86f]/10 text-[#f3d99a]">
-                <Bot size={28} aria-hidden="true" />
-              </span>
-            </div>
-            <div>
-              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.34em] text-[#d8b86f]">
-                Asesor IA proximamente
-              </p>
-              <h2 className="max-w-4xl text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl">
-                Un asistente comercial para resolver dudas, calificar leads y
-                acelerar el siguiente paso.
-              </h2>
-            <p className="mt-7 max-w-3xl text-lg leading-8 text-white/66">
-                El asesor digital está preparado para responder preguntas sobre
-                precios, ubicación, medidas, documentación y próximos pasos de contacto.
-              </p>
-            </div>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 function LeadForm() {
   const interestOptions = useMemo(
     () => ["Terreno", activeTenant.project.name, "Lote sobre calle principal", "Documentación"],
@@ -763,7 +731,6 @@ export default function Home() {
       <PropertyCards />
       <LocationSection />
       <TrustSection />
-      <AdvisorSection />
       <LeadForm />
       <AdvisorChat />
       <footer className="border-t border-white/10 bg-[#030a16] px-6 py-10 text-white/52 lg:px-10">
