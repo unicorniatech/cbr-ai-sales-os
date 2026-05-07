@@ -178,7 +178,13 @@ async function requestAgentReply(
   };
 }
 
-function LeadCaptureMiniForm({ onSuccess }: { onSuccess: () => void }) {
+function LeadCaptureMiniForm({
+  onSuccess,
+  transcript,
+}: {
+  onSuccess: () => void;
+  transcript: string;
+}) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [interest, setInterest] = useState(activeTenant.project.name);
@@ -192,6 +198,7 @@ function LeadCaptureMiniForm({ onSuccess }: { onSuccess: () => void }) {
       name,
       phone,
       interest,
+      notes: transcript || `Capturado desde Asesor IA. Interés: ${interest}`,
       source: "Asesor IA",
     });
 
@@ -461,7 +468,13 @@ function TypingIndicator() {
   );
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({
+  message,
+  transcript,
+}: {
+  message: ChatMessage;
+  transcript: string;
+}) {
   const isVisitor = message.role === "visitor";
 
   return (
@@ -492,7 +505,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           <p className={message.kind ? "mb-2" : ""}>{message.text}</p>
 
           {message.kind === "lead-form" && (
-            <LeadCaptureMiniForm onSuccess={() => {}} />
+            <LeadCaptureMiniForm onSuccess={() => {}} transcript={transcript} />
           )}
           {message.kind === "calculator" && <PaymentCalculatorCard />}
           {message.kind === "membership" && <MembershipCard />}
@@ -534,6 +547,13 @@ export function AdvisorChat() {
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const unreadLabel = useMemo(() => (isOpen ? "Cerrar chat" : "Abrir asesor IA"), [isOpen]);
+  const conversationTranscript = useMemo(
+    () =>
+      messages
+        .map((message) => `${message.role === "visitor" ? "Visitante" : "Asesor IA"}: ${message.text}`)
+        .join("\n\n"),
+    [messages],
+  );
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -659,6 +679,7 @@ export function AdvisorChat() {
                 <MessageBubble
                   key={message.id}
                   message={message}
+                  transcript={conversationTranscript}
                 />
               ))}
 
