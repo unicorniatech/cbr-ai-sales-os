@@ -448,22 +448,28 @@ function TerrainVisionCard() {
 
 function TypingIndicator() {
   return (
-    <div className="flex gap-1 px-1">
-      <motion.span
-        className="size-1.5 rounded-full bg-[#d8b86f]"
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-      />
-      <motion.span
-        className="size-1.5 rounded-full bg-[#d8b86f]"
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
-      />
-      <motion.span
-        className="size-1.5 rounded-full bg-[#d8b86f]"
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
-      />
+    <div className="min-w-[220px] space-y-3">
+      <div className="flex items-center gap-2 text-xs text-[#f3d99a]">
+        <Sparkles size={13} />
+        <span>Analizando tu pregunta...</span>
+      </div>
+      <div className="flex items-center gap-2">
+        {[0, 1, 2].map((dot) => (
+          <motion.span
+            key={dot}
+            className="size-2 rounded-full bg-[#d8b86f]"
+            animate={{ y: [0, -5, 0], opacity: [0.45, 1, 0.45] }}
+            transition={{ duration: 0.7, repeat: Infinity, delay: dot * 0.14 }}
+          />
+        ))}
+        <div className="ml-2 h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+          <motion.div
+            className="h-full w-1/2 rounded-full bg-gradient-to-r from-[#d8b86f] to-[#f3d99a]"
+            animate={{ x: ["-100%", "220%"] }}
+            transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -591,16 +597,14 @@ export function AdvisorChat() {
     setMessages((current) => [...current, visitorMessage]);
     setInput("");
 
-    // Simulate typing
     setIsTyping(true);
-    await new Promise((resolve) => setTimeout(resolve, 600 + Math.random() * 400));
-    setIsTyping(false);
 
     const advisorId = nextIdRef.current++;
     const history = [...messages, visitorMessage];
     let reply: ChatMessage;
 
     try {
+      await new Promise((resolve) => setTimeout(resolve, 250));
       reply = await requestAgentReply(cleanValue, history, advisorId);
     } catch {
       reply = getAdvisorReply(cleanValue, advisorId);
@@ -609,6 +613,7 @@ export function AdvisorChat() {
     reply.timestamp = new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
 
     setMessages((current) => [...current, reply]);
+    setIsTyping(false);
   };
 
   return (
