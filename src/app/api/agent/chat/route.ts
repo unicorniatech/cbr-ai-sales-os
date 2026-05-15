@@ -6,7 +6,7 @@ type IncomingMessage = {
   text: string;
 };
 
-type AgentAction = "none" | "lead_form" | "calculator" | "membership_offer" | "terrain_vision" | "whatsapp_handoff";
+type AgentAction = "none" | "lead_form" | "calculator" | "terrain_vision" | "whatsapp_handoff";
 
 type AgentResponse = {
   reply: string;
@@ -43,19 +43,6 @@ function getLocalAdvisorResponse(message: string): AgentResponse {
     };
   }
 
-  if (["membresia", "membresía", "tanda", "ahorro", "100", "cien", "mensual", "club"].some((word) => normalized.includes(word))) {
-    return {
-      ...fallbackResponse,
-      reply:
-        "La Membresía de Patrimonio OS es una forma mexicana y local de avanzar hacia patrimonio. No pagas para consumir contenido: aportas para crear. La idea es empezar con poco, formar hábito, aprender, desbloquear oportunidades y recibir guía para moverte hacia un terreno o una casa con claridad.",
-      action: "membership_offer",
-      leadTemperature: "warm",
-      leadScore: 78,
-      shouldCaptureLead: true,
-      nextStep: "Explicar membresía y ofrecer captura para lista de interesados.",
-    };
-  }
-
   if (["enchula", "enchúlame", "foto", "imagen", "visualizar", "diseno", "diseño"].some((word) => normalized.includes(word))) {
     return {
       ...fallbackResponse,
@@ -66,6 +53,19 @@ function getLocalAdvisorResponse(message: string): AgentResponse {
       leadScore: 82,
       shouldCaptureLead: true,
       nextStep: "Mostrar herramienta Enchúlame el terreno.",
+    };
+  }
+
+  if (["membresia", "membresía", "tanda", "ahorro", "100", "cien", "club"].some((word) => normalized.includes(word))) {
+    return {
+      ...fallbackResponse,
+      reply:
+        "Por ahora CBR no maneja membresías ni programas de ahorro dentro de este sitio. Te puedo ayudar con precios, ubicación, medidas, documentación y contacto para los terrenos disponibles.",
+      action: "none",
+      leadTemperature: "cold",
+      leadScore: 35,
+      shouldCaptureLead: false,
+      nextStep: "Redirigir la conversación a terrenos CBR.",
     };
   }
 
@@ -104,7 +104,7 @@ const responseSchema = {
     },
     action: {
       type: "string",
-      enum: ["none", "lead_form", "calculator", "membership_offer", "terrain_vision", "whatsapp_handoff"],
+      enum: ["none", "lead_form", "calculator", "terrain_vision", "whatsapp_handoff"],
       description: "Acción de UI o handoff que debe activar el frontend.",
     },
     leadTemperature: {
@@ -153,8 +153,8 @@ Objetivo:
 - Calificar intención de compra sin presionar de forma agresiva.
 - Capturar leads cuando haya intención, duda concreta, interés en precio, visita, ubicación, documentos o pagos.
 - Sugerir handoff a WhatsApp cuando el lead está listo para visita, apartado, llamada o contacto humano.
-- Explicar la Membresía como una forma mexicana de compromiso patrimonial: no se paga para consumir, se aporta para crear, aprender y avanzar.
 - Presentar "Enchúlame el terreno" cuando el usuario quiera subir foto, imaginar mejoras, diseño, fachada, casa, parque o visualización.
+- No ofrecer membresías, tandas, clubes, ahorro por suscripción ni programas externos. Este sitio solo vende y asesora sobre terrenos CBR.
 - Nunca inventes disponibilidad, condiciones legales, promesas de plusvalía garantizada o datos no dados.
 - Si falta información, responde con honestidad y ofrece conectar con asesor.
 
@@ -174,13 +174,59 @@ ${kb}
 Reglas de acción:
 - Usa "lead_form" si el usuario quiere contacto, visita, WhatsApp, asesor, documentos, ubicación exacta o muestra intención de compra.
 - Usa "calculator" si pregunta por pagos, mensualidades, enganche, plan o financiamiento.
-- Usa "membership_offer" si pregunta por membresía, ahorro, tanda, aportaciones pequeñas, club, mensualidad o cómo empezar con poco.
 - Usa "terrain_vision" si pregunta por subir una foto, transformar imagen, diseño visual, mejorar entorno o "enchular" un terreno.
 - Usa "whatsapp_handoff" si parece listo para hablar con humano, visitar, apartar o cerrar.
 - Usa "none" para respuestas informativas simples.
 
 Responde siempre como JSON válido siguiendo el schema solicitado.
 `.trim();
+}
+
+function shouldUseFastLocalResponse(message: string) {
+  const normalized = message.toLowerCase();
+  const fastKeywords = [
+    "precio",
+    "cuesta",
+    "costo",
+    "vale",
+    "mensualidad",
+    "enganche",
+    "calcula",
+    "calcular",
+    "plan",
+    "pagos",
+    "financiamiento",
+    "ubicacion",
+    "ubicación",
+    "donde",
+    "mapa",
+    "jojutla",
+    "documento",
+    "legal",
+    "papeles",
+    "medida",
+    "metros",
+    "lote",
+    "datos",
+    "contacto",
+    "whatsapp",
+    "asesor",
+    "cita",
+    "visita",
+    "apartar",
+    "enchula",
+    "enchúlame",
+    "foto",
+    "imagen",
+    "visualizar",
+    "membresia",
+    "membresía",
+    "tanda",
+    "ahorro",
+    "club",
+  ];
+
+  return fastKeywords.some((word) => normalized.includes(word));
 }
 
 function normalizeAgentResponse(value: unknown): AgentResponse {
@@ -248,7 +294,7 @@ async function callOpenAI({
       ? buildSystemPrompt()
       : `${buildSystemPrompt()}\n\nResponde SOLO con JSON válido que incluya reply, action, leadTemperature, leadScore, shouldCaptureLead y nextStep.`,
     input,
-    max_output_tokens: 700,
+    max_output_tokens: 360,
   };
 
   if (structured) {
@@ -301,10 +347,10 @@ export async function POST(request: Request) {
 
   const apiKey = process.env.OPENAI_API_KEY;
 
-  if (!apiKey) {
+  if (!apiKey || shouldUseFastLocalResponse(message)) {
     return NextResponse.json({
       ...getLocalAdvisorResponse(message),
-      configured: false,
+      configured: Boolean(apiKey),
     });
   }
 

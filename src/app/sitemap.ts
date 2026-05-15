@@ -22,6 +22,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
+    {
+      url: `${baseUrl}/casas`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/proyectos`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.65,
+    },
     ...sectionSlugs.map((slug) => ({
       url: `${baseUrl}/secciones/${slug}`,
       lastModified: now,

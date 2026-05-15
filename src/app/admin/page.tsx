@@ -146,6 +146,49 @@ function ConversationPanel({ selectedLead }: { selectedLead?: Lead }) {
 }
 
 type Tab = "leads" | "content";
+type ContentEditorTab = "terrenos" | "casas" | "proyectos";
+
+const contentEditorTabs: Array<{
+  id: ContentEditorTab;
+  label: string;
+  description: string;
+  sectionIds: string[];
+}> = [
+  {
+    id: "terrenos",
+    label: "#terrenos",
+    description: "Home principal, terrenos, misión, visión, valores y contacto.",
+    sectionIds: [
+      "proyecto",
+      "terrenos-200m2",
+      "calle-principal",
+      "terrenos-patrimoniales",
+      "claridad-documental",
+      "mision",
+      "vision",
+      "valores",
+      "ubicacion-contacto",
+    ],
+  },
+  {
+    id: "casas",
+    label: "Casas",
+    description: "Landing /casas y sus bloques de venta.",
+    sectionIds: [
+      "casas-intro",
+      "casas-familiares",
+      "casas-descanso",
+      "casas-inversion",
+      "casas-proceso",
+    ],
+  },
+  {
+    id: "proyectos",
+    label: "Otros proyectos",
+    description: "Página /proyectos preparada para futuros desarrollos.",
+    sectionIds: ["otros-proyectos-intro"],
+  },
+];
 
 function LeadsView({
   leads,
@@ -263,6 +306,7 @@ function LeadsView({
 
 function ContentEditorView() {
   const [sections, setSections] = useState<EditableSection[]>(editableContentDefaults);
+  const [activeEditorTab, setActiveEditorTab] = useState<ContentEditorTab>("terrenos");
   const [saved, setSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -412,6 +456,9 @@ function ContentEditorView() {
     setSaved(false);
   };
 
+  const activeEditorConfig = contentEditorTabs.find((tab) => tab.id === activeEditorTab) ?? contentEditorTabs[0];
+  const visibleSections = sections.filter((section) => activeEditorConfig.sectionIds.includes(section.id));
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 border border-white/10 bg-white/[0.025] p-5 md:flex-row md:items-center md:justify-between">
@@ -442,8 +489,28 @@ function ContentEditorView() {
         </div>
       )}
 
+      <div className="border border-white/10 bg-white/[0.025] p-3">
+        <div className="grid gap-2 md:grid-cols-3">
+          {contentEditorTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveEditorTab(tab.id)}
+              className={`min-h-16 border p-3 text-left transition ${
+                activeEditorTab === tab.id
+                  ? "border-[#d8b86f]/60 bg-[#d8b86f]/12 text-[#f3d99a]"
+                  : "border-white/10 bg-[#06111f] text-white/62 hover:border-[#d8b86f]/35 hover:text-white"
+              }`}
+            >
+              <span className="block text-sm font-semibold">{tab.label}</span>
+              <span className="mt-1 block text-xs leading-5 text-white/42">{tab.description}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid gap-5">
-        {sections.map((section) => (
+        {visibleSections.map((section) => (
           <article key={section.id} className="grid gap-5 border border-white/10 bg-white/[0.025] p-5 lg:grid-cols-[220px_1fr]">
             <div className="flex min-h-36 items-center justify-center overflow-hidden border border-white/10 bg-[#06111f]">
               {section.image ? (

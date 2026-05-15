@@ -142,6 +142,108 @@ export const editableContentDefaults: EditableSection[] = [
     ],
     link: "/#contacto",
   },
+  {
+    id: "casas-intro",
+    title: "Casas en Morelos",
+    copy:
+      "Opciones habitacionales para familias que buscan comprar con claridad, trato directo y acompañamiento profesional.",
+    pageCopy:
+      "Esta línea presenta casas y oportunidades habitacionales atendidas por Grupo Inmobiliario Castrejón Rodríguez. Cada propiedad puede documentarse con fotografías, videos, descripción amplia, ubicación, condiciones de venta y datos de contacto para seguimiento.",
+    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1500&q=82",
+    media: [
+      {
+        id: "casas-intro-main",
+        url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1500&q=82",
+        type: "image",
+      },
+    ],
+    link: "/casas",
+  },
+  {
+    id: "casas-familiares",
+    title: "Casas familiares",
+    copy:
+      "Espacios pensados para vivir, crecer y construir patrimonio familiar con una compra seria y acompañada.",
+    pageCopy:
+      "Las casas familiares se presentan con información clara para compradores que necesitan entender ubicación, distribución, precio, documentación y próximos pasos antes de decidir. El objetivo es dar una ruta simple para solicitar asesoría y revisar cada propiedad con calma.",
+    image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1400&q=82",
+    media: [
+      {
+        id: "casas-familiares-main",
+        url: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1400&q=82",
+        type: "image",
+      },
+    ],
+    link: "/casas#familiares",
+  },
+  {
+    id: "casas-descanso",
+    title: "Casas de descanso",
+    copy:
+      "Propiedades para quienes buscan un lugar tranquilo en Morelos, con información directa y proceso ordenado.",
+    pageCopy:
+      "Las casas de descanso pueden mostrar fotografías, videos, características del entorno, amenidades, condiciones de visita y datos de contacto. Esta sección está preparada para que el cliente pueda editar el contenido desde el tablero conforme agregue inventario real.",
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=82",
+    media: [
+      {
+        id: "casas-descanso-main",
+        url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=82",
+        type: "image",
+      },
+    ],
+    link: "/casas#descanso",
+  },
+  {
+    id: "casas-inversion",
+    title: "Casas como inversión",
+    copy:
+      "Opciones para compradores que buscan plusvalía, renta o un activo residencial con revisión documental.",
+    pageCopy:
+      "Esta sección permite comunicar oportunidades residenciales con enfoque de inversión. La información puede incluir precio, condiciones, zona, potencial de uso, documentación y seguimiento con asesor humano.",
+    image: "https://images.unsplash.com/photo-1605146769289-440113cc3d00?auto=format&fit=crop&w=1400&q=82",
+    media: [
+      {
+        id: "casas-inversion-main",
+        url: "https://images.unsplash.com/photo-1605146769289-440113cc3d00?auto=format&fit=crop&w=1400&q=82",
+        type: "image",
+      },
+    ],
+    link: "/casas#inversion",
+  },
+  {
+    id: "casas-proceso",
+    title: "Proceso de compra",
+    copy:
+      "Revisión de información, documentación disponible, visita y acompañamiento hasta el siguiente paso.",
+    pageCopy:
+      "El proceso de compra de casas debe sentirse claro para el comprador: resolver dudas, revisar documentación disponible, programar visita, confirmar condiciones y avanzar con acompañamiento directo. Esta sección ayuda a explicar esa ruta de manera sencilla.",
+    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=82",
+    media: [
+      {
+        id: "casas-proceso-main",
+        url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=82",
+        type: "image",
+      },
+    ],
+    link: "/casas#proceso",
+  },
+  {
+    id: "otros-proyectos-intro",
+    title: "Otros proyectos",
+    copy:
+      "Un espacio preparado para futuros desarrollos, oportunidades y líneas inmobiliarias adicionales.",
+    pageCopy:
+      "Esta página queda lista para crecer con nuevos desarrollos, terrenos, casas u oportunidades inmobiliarias adicionales. Cada proyecto podrá tener textos, imágenes, videos y enlaces editables desde el tablero.",
+    image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1500&q=82",
+    media: [
+      {
+        id: "otros-proyectos-main",
+        url: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1500&q=82",
+        type: "image",
+      },
+    ],
+    link: "/proyectos",
+  },
 ];
 
 export function mergeEditableSections(sections: EditableSection[]) {

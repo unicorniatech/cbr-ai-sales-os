@@ -19,8 +19,8 @@ import { captureLead } from "../lib/lead-store";
 import { activeTenant, formatCurrency } from "../config/tenants";
 
 type Role = "advisor" | "visitor";
-type MessageKind = "text" | "lead-form" | "calculator" | "membership" | "terrain-vision";
-type AgentApiAction = "none" | "lead_form" | "calculator" | "membership_offer" | "terrain_vision" | "whatsapp_handoff";
+type MessageKind = "text" | "lead-form" | "calculator" | "terrain-vision" | "location-map";
+type AgentApiAction = "none" | "lead_form" | "calculator" | "terrain_vision" | "whatsapp_handoff";
 type AgentApiResponse = {
   reply: string;
   action: AgentApiAction;
@@ -44,6 +44,9 @@ const knowledgeBase = activeTenant.knowledgeBase;
 const quickActions = activeTenant.quickActions;
 const adminUrl = "https://cbr-ai-sales-os.vercel.app/admin";
 const terrainVisionStyles = ["Más verde", "Casa económica", "Fachada moderna", "Parque", "Iluminación"];
+const mapQuery = `${projectFacts.location}, México`;
+const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
+const googleMapsEmbedUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
 
 function compressImageFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -83,6 +86,15 @@ function compressImageFile(file: File): Promise<string> {
 function getAdvisorReply(input: string, id: number): ChatMessage {
   const normalized = input.toLowerCase();
 
+  if (["ubicacion", "ubicación", "donde", "mapa", "maps", "jojutla"].some((word) => normalized.includes(word))) {
+    return {
+      id,
+      role: "advisor",
+      kind: "location-map",
+      text: `${projectFacts.name} está en ${projectFacts.location}. Te dejo el mapa para revisarlo fácil.`,
+    };
+  }
+
   if (["datos", "contacto", "whatsapp", "asesor", "cita"].some((word) => normalized.includes(word))) {
     return {
       id,
@@ -98,15 +110,6 @@ function getAdvisorReply(input: string, id: number): ChatMessage {
       role: "advisor",
       kind: "calculator",
       text: "Te dejo un calculo rapido con los datos iniciales del proyecto.",
-    };
-  }
-
-  if (["membresia", "membresía", "tanda", "ahorro", "club", "mensual"].some((word) => normalized.includes(word))) {
-    return {
-      id,
-      role: "advisor",
-      kind: "membership",
-      text: "La Membresía de Patrimonio OS no es para consumir: es para crear patrimonio. Empiezas con poco, formas hábito y desbloqueas oportunidades con guía local e IA.",
     };
   }
 
@@ -132,9 +135,18 @@ function getAdvisorReply(input: string, id: number): ChatMessage {
   };
 }
 
+function getMessageKindFromInput(input: string): MessageKind | undefined {
+  const normalized = input.toLowerCase();
+
+  if (["ubicacion", "ubicación", "donde", "mapa", "maps", "jojutla"].some((word) => normalized.includes(word))) {
+    return "location-map";
+  }
+
+  return undefined;
+}
+
 function getMessageKindFromAgent(response: AgentApiResponse): MessageKind | undefined {
   if (response.action === "calculator") return "calculator";
-  if (response.action === "membership_offer") return "membership";
   if (response.action === "terrain_vision") return "terrain-vision";
   if (
     response.action === "lead_form" ||
@@ -299,25 +311,6 @@ function PaymentCalculatorCard() {
   );
 }
 
-function MembershipCard() {
-  return (
-    <div className="mt-3 space-y-3 border border-[#d8b86f]/25 bg-[#06111f] p-3 text-sm">
-      <div className="flex items-center gap-2 text-[#f3d99a]">
-        <Sparkles size={16} />
-        <span className="font-medium">Membresía Patrimonio</span>
-      </div>
-      <p className="text-white/68">
-        Los primeros $100 pueden ir por nuestra cuenta. Tú continúas el hábito,
-        aprendes, avanzas y desbloqueas oportunidades reales con agencias locales.
-      </p>
-      <button className="inline-flex min-h-10 w-full items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#07111f]">
-        Quiero entrar a la lista
-        <ArrowRight size={14} />
-      </button>
-    </div>
-  );
-}
-
 function TerrainVisionCard() {
   const [sourceImage, setSourceImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
@@ -446,6 +439,35 @@ function TerrainVisionCard() {
   );
 }
 
+function LocationMapCard() {
+  return (
+    <div className="mt-3 overflow-hidden border border-[#d8b86f]/25 bg-[#06111f] text-sm">
+      <div className="space-y-3 p-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.16em] text-white/38">Ubicación del proyecto</p>
+          <p className="mt-1 font-medium text-white">{projectFacts.location}</p>
+        </div>
+        <a
+          href={googleMapsUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex min-h-10 w-full items-center justify-center gap-2 bg-[#d8b86f] px-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#07111f]"
+        >
+          Abrir en Google Maps
+          <ArrowRight size={14} />
+        </a>
+      </div>
+      <iframe
+        title={`Mapa de ${projectFacts.name}`}
+        src={googleMapsEmbedUrl}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+        className="h-52 w-full border-0"
+      />
+    </div>
+  );
+}
+
 function TypingIndicator() {
   return (
     <div className="min-w-[220px] space-y-3">
@@ -514,8 +536,8 @@ function MessageBubble({
             <LeadCaptureMiniForm onSuccess={() => {}} transcript={transcript} />
           )}
           {message.kind === "calculator" && <PaymentCalculatorCard />}
-          {message.kind === "membership" && <MembershipCard />}
           {message.kind === "terrain-vision" && <TerrainVisionCard />}
+          {message.kind === "location-map" && <LocationMapCard />}
         </div>
 
         <span className={`text-[10px] text-white/40 ${isVisitor ? "text-right" : "text-left"} block`}>
@@ -610,6 +632,7 @@ export function AdvisorChat() {
       reply = getAdvisorReply(cleanValue, advisorId);
     }
 
+    reply.kind = reply.kind ?? getMessageKindFromInput(cleanValue);
     reply.timestamp = new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
 
     setMessages((current) => [...current, reply]);
