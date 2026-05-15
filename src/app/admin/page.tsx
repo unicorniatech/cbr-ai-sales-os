@@ -156,7 +156,7 @@ const contentEditorTabs: Array<{
 }> = [
   {
     id: "terrenos",
-    label: "#terrenos",
+    label: "#inicio",
     description: "Home principal, terrenos, misión, visión, valores y contacto.",
     sectionIds: [
       "proyecto",
@@ -184,8 +184,8 @@ const contentEditorTabs: Array<{
   },
   {
     id: "proyectos",
-    label: "Otros proyectos",
-    description: "Página /proyectos preparada para futuros desarrollos.",
+    label: "Terrenos",
+    description: "Página /proyectos preparada para futuros desarrollos de terrenos.",
     sectionIds: ["otros-proyectos-intro"],
   },
 ];

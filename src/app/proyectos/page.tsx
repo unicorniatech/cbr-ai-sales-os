@@ -37,7 +37,7 @@ function HeaderNav() {
             Casas
           </Link>
           <Link href="/proyectos" className="border border-[#d8b86f]/45 px-3 py-2 text-[#f3d99a]">
-            Otros proyectos
+            Terrenos
           </Link>
         </nav>
       </div>

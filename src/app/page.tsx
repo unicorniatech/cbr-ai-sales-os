@@ -243,7 +243,7 @@ function StickyHero() {
               Casas
             </Link>
             <Link href="/proyectos" className="hidden border border-white/18 bg-white/[0.07] px-3 py-2 backdrop-blur transition hover:border-[#d7b56d]/70 hover:text-[#f3d99a] sm:inline-flex">
-              Otros proyectos
+              Terrenos
             </Link>
             <a
               href="#contacto"

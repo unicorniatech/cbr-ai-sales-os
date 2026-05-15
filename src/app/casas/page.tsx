@@ -58,7 +58,7 @@ function HeaderNav() {
             Casas
           </Link>
           <Link href="/proyectos" className="hidden px-3 py-2 transition hover:text-[#f3d99a] sm:inline-flex">
-            Otros proyectos
+            Terrenos
           </Link>
           <a href="#contacto" className="bg-[#d8b86f] px-3 py-2 text-[#07111f]">
             Contacto

@@ -229,11 +229,11 @@ export const editableContentDefaults: EditableSection[] = [
   },
   {
     id: "otros-proyectos-intro",
-    title: "Otros proyectos",
+    title: "Terrenos",
     copy:
-      "Un espacio preparado para futuros desarrollos, oportunidades y líneas inmobiliarias adicionales.",
+      "Un espacio preparado para futuros desarrollos de terrenos, oportunidades y líneas inmobiliarias adicionales.",
     pageCopy:
-      "Esta página queda lista para crecer con nuevos desarrollos, terrenos, casas u oportunidades inmobiliarias adicionales. Cada proyecto podrá tener textos, imágenes, videos y enlaces editables desde el tablero.",
+      "Esta página queda lista para crecer con nuevos desarrollos de terrenos y oportunidades inmobiliarias adicionales. Cada proyecto podrá tener textos, imágenes, videos y enlaces editables desde el tablero.",
     image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1500&q=82",
     media: [
       {
