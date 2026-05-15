@@ -436,6 +436,51 @@ function FeaturedProject({ contentMap }: { contentMap: ContentMap }) {
   );
 }
 
+function DroneShowcase() {
+  return (
+    <section className="relative overflow-hidden bg-[#030a16] py-24 sm:py-32">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_24%,rgba(216,184,111,0.18),transparent_34%),linear-gradient(180deg,#030a16_0%,#071321_54%,#030a16_100%)]" />
+      <div className="relative mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:px-10">
+        <Reveal>
+          <div>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.34em] text-[#d8b86f]">
+              Vista aérea
+            </p>
+            <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl">
+              Recorre Cumbres de Bendición desde arriba.
+            </h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-white/64">
+              Una mirada rápida del entorno para ubicar mejor el desarrollo, sus accesos y el contexto de los terrenos.
+            </p>
+            <a
+              href="#contacto"
+              className="mt-8 inline-flex items-center gap-3 border border-[#d8b86f]/45 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#f3d99a] transition hover:bg-[#d8b86f] hover:text-[#07111f]"
+            >
+              Agendar visita
+              <ArrowRight size={16} />
+            </a>
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="relative overflow-hidden border border-white/12 bg-white/[0.035]">
+            <video
+              className="aspect-video w-full object-cover"
+              src="/videos/cumbres-drone.mp4"
+              poster="/videos/cumbres-drone-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.02),rgba(3,10,22,0.28))]" />
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 function MissionVisionSection({ contentMap }: { contentMap: ContentMap }) {
   const mission = contentMap.mision;
   const vision = contentMap.vision;
@@ -779,6 +824,7 @@ export default function Home() {
       </AnimatePresence>
       <StructuredData />
       <FeaturedProject contentMap={contentMap} />
+      <DroneShowcase />
       <MissionVisionSection contentMap={contentMap} />
       <PropertyCards contentMap={contentMap} />
       <LocationSection contentMap={contentMap} />
