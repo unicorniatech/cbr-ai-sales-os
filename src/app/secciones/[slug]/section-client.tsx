@@ -148,6 +148,29 @@ export function SectionClientPage({ slug }: { slug: string }) {
             )}
           </div>
         )}
+        {slug === "cumbres-de-bendicion" && (
+          <section className="mt-12 border-y border-white/10 py-10">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[#d8b86f]">Recorrido</p>
+                <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">Vista rápida del terreno</h2>
+              </div>
+              <p className="max-w-md text-sm leading-6 text-white/58">
+                Un vistazo directo al desarrollo para entender mejor el acceso, las líneas de lotes y el entorno.
+              </p>
+            </div>
+            <div className="overflow-hidden border border-white/10 bg-black">
+              <video
+                src="/videos/cumbres-walkthrough.mp4"
+                poster="/videos/cumbres-walkthrough-poster.jpg"
+                className="aspect-video w-full bg-black object-contain"
+                controls
+                preload="metadata"
+                playsInline
+              />
+            </div>
+          </section>
+        )}
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
           {points.map((point) => (
             <div key={point} className="flex gap-4 border border-white/10 bg-white/[0.035] p-5">

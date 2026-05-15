@@ -16,6 +16,7 @@ import {
   BadgeCheck,
   Bot,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   ChevronDown,
   FileCheck2,
@@ -45,6 +46,10 @@ type ContentMap = typeof defaultContentMap;
 
 const heroVideoEndProgress = 0.98;
 const heroVideoSafeTail = 0.08;
+const walkthroughFrames = Array.from({ length: 19 }, (_, index) => ({
+  src: `/walkthrough/walkthrough-${String(index + 1).padStart(2, "0")}.webp`,
+  label: `Punto ${index + 1}`,
+}));
 
 function getHeroVideoTargetTime(progress: number, duration: number) {
   const scrubProgress = Math.min(1, Math.max(0, progress / heroVideoEndProgress));
@@ -481,6 +486,136 @@ function DroneShowcase() {
   );
 }
 
+function WalkthroughSection() {
+  const [activeFrame, setActiveFrame] = useState(0);
+  const frame = walkthroughFrames[activeFrame];
+  const progress = ((activeFrame + 1) / walkthroughFrames.length) * 100;
+
+  const goToFrame = (direction: -1 | 1) => {
+    setActiveFrame((current) => {
+      const next = current + direction;
+
+      if (next < 0) return walkthroughFrames.length - 1;
+      if (next >= walkthroughFrames.length) return 0;
+      return next;
+    });
+  };
+
+  return (
+    <section id="recorrido" className="bg-[#071321] py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <Reveal>
+          <div className="mb-12 grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.34em] text-[#d8b86f]">
+                Recorrido virtual
+              </p>
+              <h2 className="text-balance text-4xl font-semibold leading-tight text-white sm:text-6xl">
+                Camina el desarrollo punto por punto.
+              </h2>
+            </div>
+            <p className="max-w-2xl text-lg leading-8 text-white/62">
+              Vistas reales tomadas dentro de Cumbres de Bendición para entender el terreno, los linderos y el entorno antes de agendar visita.
+            </p>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.08}>
+          <div className="overflow-hidden border border-white/12 bg-[#030a16]">
+            <div className="relative aspect-[4/5] bg-black sm:aspect-[16/10] lg:aspect-[16/9]">
+              <Image
+                key={frame.src}
+                src={frame.src}
+                alt={`Recorrido virtual Cumbres de Bendición - ${frame.label}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 1200px"
+                className="object-cover"
+                priority={activeFrame === 0}
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.08),rgba(3,10,22,0.18)_55%,rgba(3,10,22,0.82))]" />
+              <div className="absolute left-4 top-4 bg-[#030a16]/72 px-3 py-2 text-xs uppercase tracking-[0.18em] text-[#f3d99a] backdrop-blur">
+                {frame.label} / {walkthroughFrames.length}
+              </div>
+              <div className="absolute inset-x-0 bottom-0 flex flex-col gap-5 p-4 sm:p-6">
+                <div className="flex items-end justify-between gap-5">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.22em] text-white/42">Cumbres de Bendición</p>
+                    <p className="mt-2 max-w-xl text-2xl font-semibold text-white sm:text-4xl">
+                      Vista real del recorrido
+                    </p>
+                  </div>
+                  <div className="hidden gap-3 sm:flex">
+                    <button
+                      type="button"
+                      onClick={() => goToFrame(-1)}
+                      className="grid size-12 place-items-center border border-white/18 bg-white/[0.08] text-white backdrop-blur transition hover:border-[#d8b86f]/70 hover:text-[#f3d99a]"
+                      aria-label="Vista anterior"
+                    >
+                      <ChevronLeft size={22} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => goToFrame(1)}
+                      className="grid size-12 place-items-center border border-white/18 bg-white/[0.08] text-white backdrop-blur transition hover:border-[#d8b86f]/70 hover:text-[#f3d99a]"
+                      aria-label="Vista siguiente"
+                    >
+                      <ChevronRight size={22} />
+                    </button>
+                  </div>
+                </div>
+                <div className="h-1 overflow-hidden bg-white/15">
+                  <div className="h-full bg-[#d8b86f] transition-all duration-300" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 border-t border-white/10 p-4 sm:p-5">
+              <div className="flex gap-3 sm:hidden">
+                <button
+                  type="button"
+                  onClick={() => goToFrame(-1)}
+                  className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 border border-white/12 text-sm text-white/70"
+                >
+                  <ChevronLeft size={18} />
+                  Anterior
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToFrame(1)}
+                  className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 bg-[#d8b86f] text-sm font-semibold text-[#07111f]"
+                >
+                  Siguiente
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+              <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-1">
+                {walkthroughFrames.map((item, index) => (
+                  <button
+                    key={item.src}
+                    type="button"
+                    onClick={() => setActiveFrame(index)}
+                    className={`relative h-20 w-16 shrink-0 overflow-hidden border transition sm:h-24 sm:w-20 ${
+                      activeFrame === index
+                        ? "border-[#d8b86f]"
+                        : "border-white/10 opacity-55 hover:opacity-100"
+                    }`}
+                    aria-label={`Ver ${item.label}`}
+                  >
+                    <Image src={item.src} alt="" fill sizes="96px" className="object-cover" />
+                    <span className="absolute bottom-1 left-1 bg-[#030a16]/72 px-1.5 py-0.5 text-[10px] text-white/80">
+                      {index + 1}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 function MissionVisionSection({ contentMap }: { contentMap: ContentMap }) {
   const mission = contentMap.mision;
   const vision = contentMap.vision;
@@ -825,6 +960,7 @@ export default function Home() {
       <StructuredData />
       <FeaturedProject contentMap={contentMap} />
       <DroneShowcase />
+      <WalkthroughSection />
       <MissionVisionSection contentMap={contentMap} />
       <PropertyCards contentMap={contentMap} />
       <LocationSection contentMap={contentMap} />
