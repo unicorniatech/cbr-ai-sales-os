@@ -104,12 +104,16 @@ export default function ProjectsPage() {
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.1 }}>
-            <div className="relative min-h-[450px] overflow-hidden border border-white/12">
+            <div className="overflow-hidden border border-white/12 bg-white/[0.035]">
+              <div className="relative min-h-[450px] overflow-hidden">
               <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${section.image})` }} />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.08),rgba(3,10,22,0.88))]" />
-              <div className="absolute bottom-0 left-0 right-0 p-8">
-                <Building2 className="mb-5 text-[#f3d99a]" size={34} strokeWidth={1.4} />
-                <p className="max-w-xl text-lg leading-8 text-white/76">{section.pageCopy}</p>
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.04),rgba(3,10,22,0.24))]" />
+                <div className="absolute bottom-6 left-6 grid size-14 place-items-center border border-[#d8b86f]/35 bg-[#030a16]/72 text-[#f3d99a] backdrop-blur">
+                  <Building2 size={28} strokeWidth={1.4} />
+                </div>
+              </div>
+              <div className="border-t border-white/10 bg-[#071321] p-6 sm:p-8">
+                <p className="max-w-2xl text-lg leading-8 text-white/68">{section.pageCopy}</p>
               </div>
             </div>
           </motion.div>

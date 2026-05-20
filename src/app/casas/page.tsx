@@ -106,10 +106,15 @@ function HousesIntro({ section }: { section: EditableSection }) {
           </div>
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="relative min-h-[430px] overflow-hidden border border-white/12">
-            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${section.image})` }} />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.04),rgba(3,10,22,0.82))]" />
-            <div className="absolute bottom-0 left-0 right-0 p-7">
+          <div className="overflow-hidden border border-white/12 bg-white/[0.035]">
+            <div className="relative min-h-[430px] overflow-hidden">
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${section.image})` }} />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.04),rgba(3,10,22,0.22))]" />
+              <div className="absolute bottom-6 left-6 grid size-14 place-items-center border border-[#d8b86f]/35 bg-[#030a16]/72 text-[#f3d99a] backdrop-blur">
+                <Home size={28} strokeWidth={1.4} />
+              </div>
+            </div>
+            <div className="border-t border-white/10 bg-[#071321] p-6 sm:p-8">
               <p className="max-w-xl text-lg leading-8 text-white/76">{section.pageCopy}</p>
             </div>
           </div>
@@ -142,11 +147,13 @@ function HouseCategories({ contentMap }: { contentMap: ContentMap }) {
         <div className="mt-14 grid gap-6 lg:grid-cols-3">
           {categories.map(({ id, section }, index) => (
             <Reveal key={section.id} delay={index * 0.08}>
-              <article id={id} className="group relative min-h-[460px] overflow-hidden border border-white/10 bg-white/[0.03]">
-                <div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-105" style={{ backgroundImage: `url(${section.image})` }} />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.06),rgba(3,10,22,0.9))]" />
-                <div className="relative flex min-h-[460px] flex-col justify-end p-7">
-                  <Home className="mb-6 text-[#f3d99a]" size={32} strokeWidth={1.4} />
+              <article id={id} className="group overflow-hidden border border-white/10 bg-white/[0.03]">
+                <div className="relative min-h-[300px] overflow-hidden">
+                  <div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-105" style={{ backgroundImage: `url(${section.image})` }} />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.02),rgba(3,10,22,0.22))]" />
+                </div>
+                <div className="border-t border-white/10 bg-[#030a16] p-7">
+                  <Home className="mb-5 text-[#f3d99a]" size={30} strokeWidth={1.4} />
                   <h3 className="text-3xl font-semibold">{section.title}</h3>
                   <p className="mt-4 text-base leading-7 text-white/68">{section.copy}</p>
                 </div>
