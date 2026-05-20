@@ -231,9 +231,9 @@ export const editableContentDefaults: EditableSection[] = [
     id: "otros-proyectos-intro",
     title: "Terrenos",
     copy:
-      "Un espacio preparado para futuros desarrollos de terrenos, oportunidades y líneas inmobiliarias adicionales.",
+      "Explora desarrollos, locaciones y oportunidades de terrenos disponibles en Morelos.",
     pageCopy:
-      "Esta página queda lista para crecer con nuevos desarrollos de terrenos y oportunidades inmobiliarias adicionales. Cada proyecto podrá tener textos, imágenes, videos y enlaces editables desde el tablero.",
+      "Cada terreno puede tener su propia página con ubicación, precio, planos, fotografías, videos y detalles importantes para revisar antes de agendar una visita.",
     image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1500&q=82",
     media: [
       {
@@ -247,7 +247,7 @@ export const editableContentDefaults: EditableSection[] = [
 ];
 
 export function mergeEditableSections(sections: EditableSection[]) {
-  return editableContentDefaults.map((defaultSection) => ({
+  const mergedDefaults = editableContentDefaults.map((defaultSection) => ({
     ...defaultSection,
     ...sections.find((section) => section.id === defaultSection.id),
     media:
@@ -255,6 +255,11 @@ export function mergeEditableSections(sections: EditableSection[]) {
       defaultSection.media ??
       [],
   }));
+  const customSections = sections.filter(
+    (section) => !editableContentDefaults.some((defaultSection) => defaultSection.id === section.id),
+  );
+
+  return [...mergedDefaults, ...customSections];
 }
 
 export function getEditableSectionMap(sections: EditableSection[]) {

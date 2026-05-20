@@ -185,10 +185,20 @@ const contentEditorTabs: Array<{
   {
     id: "proyectos",
     label: "Terrenos",
-    description: "Página /proyectos preparada para futuros desarrollos de terrenos.",
-    sectionIds: ["otros-proyectos-intro"],
+    description: "Landing /proyectos y subpáginas de cada terreno o locación.",
+    sectionIds: ["otros-proyectos-intro", "proyecto"],
   },
 ];
+
+function slugify(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 56);
+}
 
 function LeadsView({
   leads,
@@ -312,6 +322,7 @@ function ContentEditorView() {
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingSectionId, setUploadingSectionId] = useState("");
   const [error, setError] = useState("");
+  const [deletedSectionIds, setDeletedSectionIds] = useState<string[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -351,12 +362,13 @@ function ContentEditorView() {
       const response = await fetch("/api/content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sections }),
+        body: JSON.stringify({ sections, deletedSectionIds }),
       });
 
       if (!response.ok) throw new Error("Save failed");
       const data = (await response.json()) as { sections?: EditableSection[]; stored?: boolean };
       setSections(mergeEditableSections(data.sections ?? sections));
+      setDeletedSectionIds([]);
       setSaved(true);
 
       if (!data.stored) {
@@ -456,8 +468,42 @@ function ContentEditorView() {
     setSaved(false);
   };
 
+  const addLandSection = () => {
+    const baseTitle = "Nuevo terreno";
+    const existingLandCount = sections.filter((section) => section.id.startsWith("terreno-")).length + 1;
+    const slug = slugify(`${baseTitle}-${existingLandCount}`);
+    const id = `terreno-${slug}`;
+
+    setSections((current) => [
+      ...current,
+      {
+        id,
+        title: `${baseTitle} ${existingLandCount}`,
+        copy: "Describe aquí la ubicación, precio y oportunidad principal de este terreno.",
+        pageCopy:
+          "Agrega aquí la información completa del terreno: ubicación, medidas, precio, condiciones de pago, documentación disponible, planos, referencias, fotos y próximos pasos para agendar visita.",
+        image: "",
+        media: [],
+        link: `/secciones/${slug}`,
+      },
+    ]);
+    setActiveEditorTab("proyectos");
+    setDeletedSectionIds((current) => current.filter((sectionId) => sectionId !== id));
+    setSaved(false);
+  };
+
+  const removeCustomSection = (sectionId: string) => {
+    setSections((current) => current.filter((section) => section.id !== sectionId));
+    setDeletedSectionIds((current) => [...new Set([...current, sectionId])]);
+    setSaved(false);
+  };
+
   const activeEditorConfig = contentEditorTabs.find((tab) => tab.id === activeEditorTab) ?? contentEditorTabs[0];
-  const visibleSections = sections.filter((section) => activeEditorConfig.sectionIds.includes(section.id));
+  const visibleSections = sections.filter(
+    (section) =>
+      activeEditorConfig.sectionIds.includes(section.id) ||
+      (activeEditorTab === "proyectos" && section.id.startsWith("terreno-")),
+  );
 
   return (
     <div className="space-y-6">
@@ -476,6 +522,16 @@ function ContentEditorView() {
           <SquarePen size={16} />
           {isSaving ? "Guardando..." : "Guardar y publicar"}
         </button>
+        {activeEditorTab === "proyectos" && (
+          <button
+            type="button"
+            onClick={addLandSection}
+            className="inline-flex min-h-10 items-center justify-center gap-2 border border-[#d8b86f]/35 px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#f3d99a] transition hover:bg-[#d8b86f] hover:text-[#07111f]"
+          >
+            <CirclePlus size={16} />
+            Agregar terreno
+          </button>
+        )}
       </div>
 
       {saved && (
@@ -534,6 +590,16 @@ function ContentEditorView() {
                   />
                 </label>
                 <span className="text-xs text-white/35">JPG, PNG o WebP. Se publica al guardar.</span>
+                {section.id.startsWith("terreno-") && (
+                  <button
+                    type="button"
+                    onClick={() => removeCustomSection(section.id)}
+                    className="ml-auto inline-flex min-h-10 items-center justify-center gap-2 border border-rose-300/25 px-4 text-xs font-semibold uppercase tracking-[0.14em] text-rose-100 transition hover:bg-rose-300/10"
+                  >
+                    <Trash2 size={15} />
+                    Borrar terreno
+                  </button>
+                )}
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="grid gap-2 text-sm text-white/58">

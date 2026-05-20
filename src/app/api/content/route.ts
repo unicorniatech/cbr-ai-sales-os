@@ -19,6 +19,8 @@ type ContentSectionRow = {
   sort_order: number;
 };
 
+const optionalContentSectionFields = "tenant_id,section_id,title,copy,page_copy,image_url,media,link,sort_order";
+
 function toClientSection(row: ContentSectionRow): EditableSection {
   return {
     id: row.section_id,
@@ -55,6 +57,7 @@ export async function GET() {
 
   try {
     const query = new URLSearchParams({
+      select: optionalContentSectionFields,
       tenant_id: `eq.${activeTenant.id}`,
       order: "sort_order.asc",
     }).toString();
@@ -78,8 +81,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as { sections?: EditableSection[] };
+  const body = (await request.json()) as { sections?: EditableSection[]; deletedSectionIds?: string[] };
   const sections = mergeEditableSections(body.sections ?? []);
+  const deletedSectionIds = body.deletedSectionIds ?? [];
 
   if (!isSupabaseConfigured()) {
     return NextResponse.json({
@@ -90,6 +94,19 @@ export async function POST(request: Request) {
   }
 
   try {
+    await Promise.all(
+      deletedSectionIds.map((sectionId) =>
+        supabaseRest<ContentSectionRow[]>({
+          path: "content_sections",
+          method: "DELETE",
+          query: new URLSearchParams({
+            tenant_id: `eq.${activeTenant.id}`,
+            section_id: `eq.${sectionId}`,
+          }).toString(),
+        }),
+      ),
+    );
+
     const rows = await supabaseRest<ContentSectionRow[]>({
       path: "content_sections",
       method: "POST",

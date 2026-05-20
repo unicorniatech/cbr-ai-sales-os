@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Building2, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, Building2, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { AdvisorChat } from "../components/advisor-chat";
 import { activeTenant } from "../config/tenants";
 import {
@@ -48,6 +48,9 @@ function HeaderNav() {
 export default function ProjectsPage() {
   const [contentMap, setContentMap] = useState<ContentMap>(defaultContentMap);
   const section = contentMap["otros-proyectos-intro"];
+  const landSections = Object.values(contentMap).filter(
+    (item) => item.id === "proyecto" || item.id.startsWith("terreno-"),
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -83,10 +86,10 @@ export default function ProjectsPage() {
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/casas"
+                href="#terrenos"
                 className="inline-flex min-h-12 items-center justify-center gap-3 bg-[#d8b86f] px-6 text-sm font-semibold uppercase tracking-[0.16em] text-[#07111f]"
               >
-                Ver casas
+                Ver terrenos
                 <ArrowRight size={17} />
               </Link>
               <a
@@ -110,6 +113,46 @@ export default function ProjectsPage() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+      <section id="terrenos" className="bg-[#030a16] px-6 py-24 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 max-w-3xl">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.34em] text-[#d8b86f]">
+              Locaciones
+            </p>
+            <h2 className="text-balance text-4xl font-semibold leading-tight sm:text-6xl">
+              Terrenos con su propia información, fotos y seguimiento.
+            </h2>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2">
+            {landSections.map((item, index) => (
+              <motion.article
+                key={item.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.55, delay: index * 0.04 }}
+                className="group relative min-h-[430px] overflow-hidden border border-white/10 bg-white/[0.035]"
+              >
+                <Link href={item.link} className="absolute inset-0 z-10" aria-label={`Ver ${item.title}`} />
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: `url(${item.image || section.image})` }}
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.1),rgba(3,10,22,0.9))]" />
+                <div className="relative flex min-h-[430px] flex-col justify-end p-7 sm:p-9">
+                  <MapPin className="mb-6 text-[#f3d99a]" size={32} strokeWidth={1.4} />
+                  <h3 className="text-3xl font-semibold">{item.title}</h3>
+                  <p className="mt-4 max-w-xl text-base leading-7 text-white/68">{item.copy}</p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm text-[#f3d99a]">
+                    Ver información del terreno
+                    <ArrowRight size={16} />
+                  </span>
+                </div>
+              </motion.article>
+            ))}
+          </div>
         </div>
       </section>
       <AdvisorChat />

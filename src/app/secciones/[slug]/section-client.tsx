@@ -23,6 +23,10 @@ const slugToSectionId: Record<string, string> = {
   "claridad-documental": "claridad-documental",
 };
 
+function getSectionSlug(section: EditableSection) {
+  return section.link.split("/").filter(Boolean).at(-1) ?? section.id;
+}
+
 const defaultPoints: Record<string, string[]> = {
   "cumbres-de-bendicion": [
     `${project.lots} por lote`,
@@ -43,7 +47,10 @@ const defaultPoints: Record<string, string[]> = {
 export function SectionClientPage({ slug }: { slug: string }) {
   const [contentMap, setContentMap] = useState(defaultContentMap);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
-  const sectionId = slugToSectionId[slug] ?? "proyecto";
+  const sectionId =
+    slugToSectionId[slug] ??
+    Object.values(contentMap).find((section) => getSectionSlug(section) === slug)?.id ??
+    "proyecto";
   const content = contentMap[sectionId] ?? contentMap.proyecto;
   const media = content.media?.length
     ? content.media
@@ -51,7 +58,7 @@ export function SectionClientPage({ slug }: { slug: string }) {
       ? [{ id: `${content.id}-image`, url: content.image, type: "image" as const }]
       : [];
   const activeMedia = media[activeMediaIndex] ?? media[0];
-  const points = useMemo(() => defaultPoints[slug] ?? defaultPoints["cumbres-de-bendicion"], [slug]);
+  const points = useMemo(() => defaultPoints[slug] ?? ["Ubicación editable", "Precio editable", "Fotos y videos", "Información para visita"], [slug]);
 
   const goToPrevious = () => {
     setActiveMediaIndex((current) => (current === 0 ? media.length - 1 : current - 1));
