@@ -21,6 +21,10 @@ const slugToSectionId: Record<string, string> = {
   "calle-principal": "calle-principal",
   "terrenos-patrimoniales": "terrenos-patrimoniales",
   "claridad-documental": "claridad-documental",
+  "casas-familiares": "casas-familiares",
+  "casas-descanso": "casas-descanso",
+  "casas-inversion": "casas-inversion",
+  "casas-proceso": "casas-proceso",
 };
 
 function getSectionSlug(section: EditableSection) {
@@ -42,6 +46,10 @@ const defaultPoints: Record<string, string[]> = {
   "calle-principal": [`Precio ${formatCurrency(project.mainStreetPrice)}`, "Ubicación destacada", "Enganche definido", "Mensualidad clara"],
   "terrenos-patrimoniales": ["Trato directo", "Claridad documental", "Proyecto local", "Acompañamiento profesional"],
   "claridad-documental": activeTenant.trustItems,
+  "casas-familiares": ["Ubicación editable", "Fotos y videos", "Condiciones claras", "Asesoría directa"],
+  "casas-descanso": ["Entorno editable", "Galería multimedia", "Información de visita", "Seguimiento por WhatsApp"],
+  "casas-inversion": ["Plusvalía", "Renta potencial", "Documentación", "Acompañamiento"],
+  "casas-proceso": ["Revisión inicial", "Documentación", "Visita", "Siguiente paso"],
 };
 
 export function SectionClientPage({ slug }: { slug: string }) {

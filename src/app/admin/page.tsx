@@ -173,7 +173,7 @@ const contentEditorTabs: Array<{
   {
     id: "casas",
     label: "Casas",
-    description: "Landing /casas y sus bloques de venta.",
+    description: "Landing /casas y subpáginas de cada casa o tipo de casa.",
     sectionIds: [
       "casas-intro",
       "casas-familiares",
@@ -492,6 +492,30 @@ function ContentEditorView() {
     setSaved(false);
   };
 
+  const addHouseSection = () => {
+    const baseTitle = "Nueva casa";
+    const existingHouseCount = sections.filter((section) => section.id.startsWith("casa-")).length + 1;
+    const slug = slugify(`${baseTitle}-${existingHouseCount}`);
+    const id = `casa-${slug}`;
+
+    setSections((current) => [
+      ...current,
+      {
+        id,
+        title: `${baseTitle} ${existingHouseCount}`,
+        copy: "Describe aquí la ubicación, precio y atractivo principal de esta casa.",
+        pageCopy:
+          "Agrega aquí la información completa de la casa: ubicación, precio, distribución, medidas, documentación disponible, condiciones de visita, fotografías, videos y próximos pasos.",
+        image: "",
+        media: [],
+        link: `/secciones/${slug}`,
+      },
+    ]);
+    setActiveEditorTab("casas");
+    setDeletedSectionIds((current) => current.filter((sectionId) => sectionId !== id));
+    setSaved(false);
+  };
+
   const removeCustomSection = (sectionId: string) => {
     setSections((current) => current.filter((section) => section.id !== sectionId));
     setDeletedSectionIds((current) => [...new Set([...current, sectionId])]);
@@ -502,7 +526,8 @@ function ContentEditorView() {
   const visibleSections = sections.filter(
     (section) =>
       activeEditorConfig.sectionIds.includes(section.id) ||
-      (activeEditorTab === "proyectos" && section.id.startsWith("terreno-")),
+      (activeEditorTab === "proyectos" && section.id.startsWith("terreno-")) ||
+      (activeEditorTab === "casas" && section.id.startsWith("casa-")),
   );
 
   return (
@@ -530,6 +555,16 @@ function ContentEditorView() {
           >
             <CirclePlus size={16} />
             Agregar terreno
+          </button>
+        )}
+        {activeEditorTab === "casas" && (
+          <button
+            type="button"
+            onClick={addHouseSection}
+            className="inline-flex min-h-10 items-center justify-center gap-2 border border-[#d8b86f]/35 px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#f3d99a] transition hover:bg-[#d8b86f] hover:text-[#07111f]"
+          >
+            <CirclePlus size={16} />
+            Agregar casa
           </button>
         )}
       </div>
@@ -590,14 +625,14 @@ function ContentEditorView() {
                   />
                 </label>
                 <span className="text-xs text-white/35">JPG, PNG o WebP. Se publica al guardar.</span>
-                {section.id.startsWith("terreno-") && (
+                {(section.id.startsWith("terreno-") || section.id.startsWith("casa-")) && (
                   <button
                     type="button"
                     onClick={() => removeCustomSection(section.id)}
                     className="ml-auto inline-flex min-h-10 items-center justify-center gap-2 border border-rose-300/25 px-4 text-xs font-semibold uppercase tracking-[0.14em] text-rose-100 transition hover:bg-rose-300/10"
                   >
                     <Trash2 size={15} />
-                    Borrar terreno
+                    {section.id.startsWith("casa-") ? "Borrar casa" : "Borrar terreno"}
                   </button>
                 )}
               </div>

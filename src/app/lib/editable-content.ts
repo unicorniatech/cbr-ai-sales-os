@@ -174,7 +174,7 @@ export const editableContentDefaults: EditableSection[] = [
         type: "image",
       },
     ],
-    link: "/casas#familiares",
+    link: "/secciones/casas-familiares",
   },
   {
     id: "casas-descanso",
@@ -191,7 +191,7 @@ export const editableContentDefaults: EditableSection[] = [
         type: "image",
       },
     ],
-    link: "/casas#descanso",
+    link: "/secciones/casas-descanso",
   },
   {
     id: "casas-inversion",
@@ -208,7 +208,7 @@ export const editableContentDefaults: EditableSection[] = [
         type: "image",
       },
     ],
-    link: "/casas#inversion",
+    link: "/secciones/casas-inversion",
   },
   {
     id: "casas-proceso",
@@ -225,7 +225,7 @@ export const editableContentDefaults: EditableSection[] = [
         type: "image",
       },
     ],
-    link: "/casas#proceso",
+    link: "/secciones/casas-proceso",
   },
   {
     id: "otros-proyectos-intro",

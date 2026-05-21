@@ -125,11 +125,11 @@ function HousesIntro({ section }: { section: EditableSection }) {
 }
 
 function HouseCategories({ contentMap }: { contentMap: ContentMap }) {
-  const categories = [
-    { id: "familiares", section: contentMap["casas-familiares"] },
-    { id: "descanso", section: contentMap["casas-descanso"] },
-    { id: "inversion", section: contentMap["casas-inversion"] },
-  ];
+  const categories = Object.values(contentMap).filter(
+    (section) =>
+      section.id.startsWith("casa-") ||
+      ["casas-familiares", "casas-descanso", "casas-inversion"].includes(section.id),
+  );
 
   return (
     <section className="bg-[#071321] px-6 py-24 text-white sm:py-32 lg:px-10">
@@ -145,17 +145,22 @@ function HouseCategories({ contentMap }: { contentMap: ContentMap }) {
           </div>
         </Reveal>
         <div className="mt-14 grid gap-6 lg:grid-cols-3">
-          {categories.map(({ id, section }, index) => (
+          {categories.map((section, index) => (
             <Reveal key={section.id} delay={index * 0.08}>
-              <article id={id} className="group overflow-hidden border border-white/10 bg-white/[0.03]">
+              <article id={section.id} className="group relative overflow-hidden border border-white/10 bg-white/[0.03]">
+                <Link href={section.link} className="absolute inset-0 z-10" aria-label={`Ver ${section.title}`} />
                 <div className="relative min-h-[300px] overflow-hidden">
                   <div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-105" style={{ backgroundImage: `url(${section.image})` }} />
                   <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.02),rgba(3,10,22,0.22))]" />
                 </div>
-                <div className="border-t border-white/10 bg-[#030a16] p-7">
+                <div className="relative border-t border-white/10 bg-[#030a16] p-7">
                   <Home className="mb-5 text-[#f3d99a]" size={30} strokeWidth={1.4} />
                   <h3 className="text-3xl font-semibold">{section.title}</h3>
                   <p className="mt-4 text-base leading-7 text-white/68">{section.copy}</p>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm text-[#f3d99a]">
+                    Ver información de la casa
+                    <ArrowRight size={16} />
+                  </span>
                 </div>
               </article>
             </Reveal>

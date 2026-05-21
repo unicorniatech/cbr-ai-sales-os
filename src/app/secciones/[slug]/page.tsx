@@ -9,6 +9,10 @@ const staticSlugs = [
   "calle-principal",
   "terrenos-patrimoniales",
   "claridad-documental",
+  "casas-familiares",
+  "casas-descanso",
+  "casas-inversion",
+  "casas-proceso",
 ];
 
 export function generateStaticParams() {
