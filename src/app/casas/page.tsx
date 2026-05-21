@@ -24,6 +24,16 @@ import {
 const defaultContentMap = getEditableSectionMap(editableContentDefaults);
 type ContentMap = typeof defaultContentMap;
 
+const defaultHouseSectionLinks: Record<string, string> = {
+  "casas-familiares": "/secciones/casas-familiares",
+  "casas-descanso": "/secciones/casas-descanso",
+  "casas-inversion": "/secciones/casas-inversion",
+};
+
+function getHouseSectionHref(section: EditableSection) {
+  return defaultHouseSectionLinks[section.id] ?? section.link;
+}
+
 function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
     <motion.div
@@ -148,7 +158,7 @@ function HouseCategories({ contentMap }: { contentMap: ContentMap }) {
           {categories.map((section, index) => (
             <Reveal key={section.id} delay={index * 0.08}>
               <article id={section.id} className="group relative overflow-hidden border border-white/10 bg-white/[0.03]">
-                <Link href={section.link} className="absolute inset-0 z-10" aria-label={`Ver ${section.title}`} />
+                <Link href={getHouseSectionHref(section)} className="absolute inset-0 z-10" aria-label={`Ver ${section.title}`} />
                 <div className="relative min-h-[300px] overflow-hidden">
                   <div className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-105" style={{ backgroundImage: `url(${section.image})` }} />
                   <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,10,22,0.02),rgba(3,10,22,0.22))]" />
