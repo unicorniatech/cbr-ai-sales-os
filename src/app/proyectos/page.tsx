@@ -33,9 +33,6 @@ function HeaderNav() {
           <Link href="/#terrenos" className="hidden px-3 py-2 transition hover:text-[#f3d99a] sm:inline-flex">
             Terrenos
           </Link>
-          <Link href="/casas" className="px-3 py-2 transition hover:text-[#f3d99a]">
-            Casas
-          </Link>
           <Link href="/proyectos" className="border border-[#d8b86f]/45 px-3 py-2 text-[#f3d99a]">
             Terrenos
           </Link>

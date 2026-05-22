@@ -146,7 +146,7 @@ function ConversationPanel({ selectedLead }: { selectedLead?: Lead }) {
 }
 
 type Tab = "leads" | "content";
-type ContentEditorTab = "terrenos" | "casas" | "proyectos";
+type ContentEditorTab = "terrenos" | "proyectos";
 
 const contentEditorTabs: Array<{
   id: ContentEditorTab;
@@ -168,18 +168,6 @@ const contentEditorTabs: Array<{
       "vision",
       "valores",
       "ubicacion-contacto",
-    ],
-  },
-  {
-    id: "casas",
-    label: "Casas",
-    description: "Landing /casas y subpáginas de cada casa o tipo de casa.",
-    sectionIds: [
-      "casas-intro",
-      "casas-familiares",
-      "casas-descanso",
-      "casas-inversion",
-      "casas-proceso",
     ],
   },
   {
@@ -492,30 +480,6 @@ function ContentEditorView() {
     setSaved(false);
   };
 
-  const addHouseSection = () => {
-    const baseTitle = "Nueva casa";
-    const existingHouseCount = sections.filter((section) => section.id.startsWith("casa-")).length + 1;
-    const slug = slugify(`${baseTitle}-${existingHouseCount}`);
-    const id = `casa-${slug}`;
-
-    setSections((current) => [
-      ...current,
-      {
-        id,
-        title: `${baseTitle} ${existingHouseCount}`,
-        copy: "Describe aquí la ubicación, precio y atractivo principal de esta casa.",
-        pageCopy:
-          "Agrega aquí la información completa de la casa: ubicación, precio, distribución, medidas, documentación disponible, condiciones de visita, fotografías, videos y próximos pasos.",
-        image: "",
-        media: [],
-        link: `/secciones/${slug}`,
-      },
-    ]);
-    setActiveEditorTab("casas");
-    setDeletedSectionIds((current) => current.filter((sectionId) => sectionId !== id));
-    setSaved(false);
-  };
-
   const removeCustomSection = (sectionId: string) => {
     setSections((current) => current.filter((section) => section.id !== sectionId));
     setDeletedSectionIds((current) => [...new Set([...current, sectionId])]);
@@ -526,8 +490,7 @@ function ContentEditorView() {
   const visibleSections = sections.filter(
     (section) =>
       activeEditorConfig.sectionIds.includes(section.id) ||
-      (activeEditorTab === "proyectos" && section.id.startsWith("terreno-")) ||
-      (activeEditorTab === "casas" && section.id.startsWith("casa-")),
+      (activeEditorTab === "proyectos" && section.id.startsWith("terreno-")),
   );
 
   return (
@@ -555,16 +518,6 @@ function ContentEditorView() {
           >
             <CirclePlus size={16} />
             Agregar terreno
-          </button>
-        )}
-        {activeEditorTab === "casas" && (
-          <button
-            type="button"
-            onClick={addHouseSection}
-            className="inline-flex min-h-10 items-center justify-center gap-2 border border-[#d8b86f]/35 px-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#f3d99a] transition hover:bg-[#d8b86f] hover:text-[#07111f]"
-          >
-            <CirclePlus size={16} />
-            Agregar casa
           </button>
         )}
       </div>

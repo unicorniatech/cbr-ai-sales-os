@@ -27,7 +27,9 @@ type ContentSectionRow = {
 
 async function getSectionLinks() {
   if (!isSupabaseConfigured()) {
-    return editableContentDefaults.map((section) => section.link);
+    return editableContentDefaults
+      .filter((section) => !section.id.startsWith("casa"))
+      .map((section) => section.link);
   }
 
   try {
@@ -51,9 +53,13 @@ async function getSectionLinks() {
       })),
     );
 
-    return sections.map((section) => section.link);
+    return sections
+      .filter((section) => !section.id.startsWith("casa"))
+      .map((section) => section.link);
   } catch {
-    return editableContentDefaults.map((section) => section.link);
+    return editableContentDefaults
+      .filter((section) => !section.id.startsWith("casa"))
+      .map((section) => section.link);
   }
 }
 
@@ -71,12 +77,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
-    },
-    {
-      url: `${baseUrl}/casas`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
     },
     {
       url: `${baseUrl}/proyectos`,
