@@ -233,15 +233,8 @@ function StickyHero() {
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,rgba(204,164,88,0.22),transparent_32%),linear-gradient(115deg,rgba(3,10,22,0.95)_0%,rgba(3,10,22,0.72)_42%,rgba(3,10,22,0.5)_100%)]" />
         <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-4 px-5 py-5 text-sm text-white/80 sm:px-10">
-          <a href="#inicio" className="block w-32 sm:w-44" aria-label={brand}>
-            <Image
-              src={activeTenant.logoUrl}
-              alt={brand}
-              width={900}
-              height={600}
-              priority
-              className="h-auto w-full object-contain drop-shadow-[0_18px_45px_rgba(216,184,111,0.24)]"
-            />
+          <a href="#inicio" className="max-w-[190px] text-sm font-semibold uppercase leading-tight tracking-[0.18em] text-[#f3d99a] sm:max-w-[260px] sm:text-base" aria-label={brand}>
+            Castrejon Bienes y Raices
           </a>
           <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/72">
             <Link href="/proyectos" className="hidden border border-white/18 bg-white/[0.07] px-3 py-2 backdrop-blur transition hover:border-[#d7b56d]/70 hover:text-[#f3d99a] sm:inline-flex">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -51,14 +50,8 @@ function HeaderNav() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#030a16]/92 px-5 py-4 text-white backdrop-blur lg:px-10">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-5">
-        <Link href="/" className="block w-32 sm:w-44" aria-label={activeTenant.brand}>
-          <Image
-            src={activeTenant.logoUrl}
-            alt={activeTenant.brand}
-            width={900}
-            height={600}
-            className="h-auto w-full object-contain"
-          />
+        <Link href="/" className="max-w-[190px] text-sm font-semibold uppercase leading-tight tracking-[0.18em] text-[#f3d99a] sm:max-w-[260px] sm:text-base" aria-label={activeTenant.brand}>
+          Castrejon Bienes y Raices
         </Link>
         <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/62">
           <Link href="/#terrenos" className="hidden px-3 py-2 transition hover:text-[#f3d99a] sm:inline-flex">
