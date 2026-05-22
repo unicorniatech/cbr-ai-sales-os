@@ -6,6 +6,8 @@ import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, MapPin, MessageCirc
 import { activeTenant, formatCurrency } from "@/app/config/tenants";
 import {
   editableContentDefaults,
+  getSectionDetails,
+  getVisiblePageCopy,
   getEditableSectionMap,
   type EditableSection,
 } from "@/app/lib/editable-content";
@@ -66,7 +68,19 @@ export function SectionClientPage({ slug }: { slug: string }) {
       ? [{ id: `${content.id}-image`, url: content.image, type: "image" as const }]
       : [];
   const activeMedia = media[activeMediaIndex] ?? media[0];
-  const points = useMemo(() => defaultPoints[slug] ?? ["Ubicación editable", "Precio editable", "Fotos y videos", "Información para visita"], [slug]);
+  const details = useMemo(() => {
+    const sectionDetails = getSectionDetails(content);
+
+    if (sectionDetails.length > 0) {
+      return sectionDetails;
+    }
+
+    return (defaultPoints[slug] ?? ["Ubicación editable", "Precio editable", "Fotos y videos", "Información para visita"]).map((point, index) => ({
+      id: `point-${index}`,
+      label: "Detalle",
+      value: point,
+    }));
+  }, [content, slug]);
 
   const goToPrevious = () => {
     setActiveMediaIndex((current) => (current === 0 ? media.length - 1 : current - 1));
@@ -107,7 +121,7 @@ export function SectionClientPage({ slug }: { slug: string }) {
         <div className="mt-16 border-y border-white/10 py-14">
           <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[#d8b86f]">Información</p>
           <h1 className="mt-5 text-balance text-5xl font-semibold leading-tight sm:text-7xl">{content.title}</h1>
-          <p className="mt-8 text-lg leading-8 text-white/68">{content.pageCopy || content.copy}</p>
+          <p className="mt-8 text-lg leading-8 text-white/68">{getVisiblePageCopy(content) || content.copy}</p>
         </div>
         {activeMedia && (
           <div className="mt-10">
@@ -187,10 +201,13 @@ export function SectionClientPage({ slug }: { slug: string }) {
           </section>
         )}
         <div className="mt-12 grid gap-4 sm:grid-cols-2">
-          {points.map((point) => (
-            <div key={point} className="flex gap-4 border border-white/10 bg-white/[0.035] p-5">
+          {details.map((detail) => (
+            <div key={detail.id} className="flex gap-4 border border-white/10 bg-white/[0.035] p-5">
               <CheckCircle2 className="mt-1 shrink-0 text-[#d8b86f]" size={20} />
-              <p className="text-white/72">{point}</p>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-[#d8b86f]/80">{detail.label}</p>
+                <p className="mt-2 text-white/72">{detail.value}</p>
+              </div>
             </div>
           ))}
         </div>

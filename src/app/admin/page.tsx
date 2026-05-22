@@ -22,7 +22,11 @@ import {
 import { fetchRemoteLeads, getAllLeads, type StoredLead } from "../lib/lead-store";
 import {
   editableContentDefaults,
+  getSectionDetails,
+  getVisiblePageCopy,
   mergeEditableSections,
+  withSectionDetails,
+  withVisiblePageCopy,
   type EditableSection,
   type EditableMedia,
 } from "../lib/editable-content";
@@ -188,6 +192,17 @@ function slugify(value: string) {
     .slice(0, 56);
 }
 
+function supportsTechnicalDetails(sectionId: string) {
+  return (
+    sectionId === "proyecto" ||
+    sectionId === "terrenos-200m2" ||
+    sectionId === "calle-principal" ||
+    sectionId === "terrenos-patrimoniales" ||
+    sectionId === "claridad-documental" ||
+    sectionId.startsWith("terreno-")
+  );
+}
+
 function LeadsView({
   leads,
   selectedLeadId,
@@ -336,7 +351,28 @@ function ContentEditorView() {
 
   const updateSection = (id: string, key: keyof EditableSection, value: string) => {
     setSections((current) =>
-      current.map((section) => (section.id === id ? { ...section, [key]: value } : section)),
+      current.map((section) =>
+        section.id === id
+          ? key === "pageCopy"
+            ? withVisiblePageCopy(section, value)
+            : { ...section, [key]: value }
+          : section,
+      ),
+    );
+    setSaved(false);
+  };
+
+  const updateSectionDetail = (sectionId: string, detailId: string, key: "label" | "value", value: string) => {
+    setSections((current) =>
+      current.map((section) => {
+        if (section.id !== sectionId) return section;
+
+        const nextDetails = getSectionDetails(section).map((detail) =>
+          detail.id === detailId ? { ...detail, [key]: value } : detail,
+        );
+
+        return withSectionDetails(section, nextDetails);
+      }),
     );
     setSaved(false);
   };
@@ -618,11 +654,37 @@ function ContentEditorView() {
               <label className="grid gap-2 text-sm text-white/58">
                 Texto amplio de subpágina
                 <textarea
-                  value={section.pageCopy}
+                  value={getVisiblePageCopy(section)}
                   onChange={(event) => updateSection(section.id, "pageCopy", event.target.value)}
                   className="min-h-40 resize-none border border-white/10 bg-[#06111f] px-3 py-3 text-white outline-none focus:border-[#d8b86f]"
                 />
               </label>
+              {supportsTechnicalDetails(section.id) && (
+                <div className="space-y-3 border-t border-white/10 pt-4">
+                  <div>
+                    <p className="text-sm font-medium text-white">Ficha técnica de subpágina</p>
+                    <p className="mt-1 text-xs text-white/38">Estos datos aparecen en los cuadros de precio, ubicación, superficie y visita.</p>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {getSectionDetails(section).map((detail) => (
+                      <div key={detail.id} className="grid gap-2 border border-white/10 bg-[#06111f] p-3">
+                        <input
+                          value={detail.label}
+                          onChange={(event) => updateSectionDetail(section.id, detail.id, "label", event.target.value)}
+                          className="min-h-9 border border-white/10 bg-[#030a16] px-3 text-sm text-[#f3d99a] outline-none focus:border-[#d8b86f]"
+                          placeholder="Etiqueta"
+                        />
+                        <input
+                          value={detail.value}
+                          onChange={(event) => updateSectionDetail(section.id, detail.id, "value", event.target.value)}
+                          className="min-h-10 border border-white/10 bg-[#030a16] px-3 text-white outline-none focus:border-[#d8b86f]"
+                          placeholder="Valor"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="space-y-3 border-t border-white/10 pt-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>

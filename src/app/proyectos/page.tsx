@@ -9,6 +9,7 @@ import { AdvisorChat } from "../components/advisor-chat";
 import { activeTenant } from "../config/tenants";
 import {
   editableContentDefaults,
+  getVisiblePageCopy,
   getEditableSectionMap,
   type EditableSection,
 } from "../lib/editable-content";
@@ -110,7 +111,7 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="border-t border-white/10 bg-[#071321] p-6 sm:p-8">
-                <p className="max-w-2xl text-lg leading-8 text-white/68">{section.pageCopy}</p>
+                <p className="max-w-2xl text-lg leading-8 text-white/68">{getVisiblePageCopy(section)}</p>
               </div>
             </div>
           </motion.div>

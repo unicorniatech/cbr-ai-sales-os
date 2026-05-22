@@ -10,12 +10,92 @@ export type EditableSection = {
   link: string;
 };
 
+export type EditableDetail = {
+  id: string;
+  label: string;
+  value: string;
+};
+
 export type EditableMedia = {
   id: string;
   url: string;
   type: "image" | "video";
   caption?: string;
 };
+
+const DETAILS_MARKER_START = "<!--CBR_DETAILS:";
+const DETAILS_MARKER_END = "-->";
+
+const defaultDetailsBySectionId: Record<string, EditableDetail[]> = {
+  proyecto: [
+    { id: "location", label: "Ubicación", value: activeTenant.project.location },
+    { id: "price", label: "Precio", value: `$${activeTenant.project.standardPrice.toLocaleString("es-MX")} MXN` },
+    { id: "surface", label: "Superficie", value: `${activeTenant.project.lots} · ${activeTenant.project.dimensions}` },
+    { id: "visit", label: "Visita", value: "Agenda por WhatsApp con trato directo." },
+  ],
+  "terrenos-200m2": [
+    { id: "location", label: "Ubicación", value: activeTenant.project.location },
+    { id: "price", label: "Precio", value: `$${activeTenant.project.standardPrice.toLocaleString("es-MX")} MXN` },
+    { id: "surface", label: "Superficie", value: `${activeTenant.project.lots} · ${activeTenant.project.dimensions}` },
+    { id: "visit", label: "Visita", value: "Información y recorrido disponibles con asesor." },
+  ],
+  "calle-principal": [
+    { id: "location", label: "Ubicación", value: "Lotes sobre calle principal dentro del proyecto." },
+    { id: "price", label: "Precio", value: `$${activeTenant.project.mainStreetPrice.toLocaleString("es-MX")} MXN` },
+    { id: "surface", label: "Superficie", value: `${activeTenant.project.lots} · ${activeTenant.project.dimensions}` },
+    { id: "visit", label: "Visita", value: "Agenda revisión de ubicación y documentación." },
+  ],
+};
+
+const genericLandDetails: EditableDetail[] = [
+  { id: "location", label: "Ubicación", value: "Por definir" },
+  { id: "price", label: "Precio", value: "Por definir" },
+  { id: "surface", label: "Superficie", value: "Por definir" },
+  { id: "visit", label: "Visita / documentación", value: "Por definir" },
+];
+
+export function getVisiblePageCopy(section: EditableSection) {
+  const markerIndex = section.pageCopy.indexOf(DETAILS_MARKER_START);
+  return (markerIndex >= 0 ? section.pageCopy.slice(0, markerIndex) : section.pageCopy).trim();
+}
+
+export function getSectionDetails(section: EditableSection) {
+  const markerIndex = section.pageCopy.indexOf(DETAILS_MARKER_START);
+
+  if (markerIndex >= 0) {
+    const detailsStart = markerIndex + DETAILS_MARKER_START.length;
+    const detailsEnd = section.pageCopy.indexOf(DETAILS_MARKER_END, detailsStart);
+    const encodedDetails = detailsEnd >= 0 ? section.pageCopy.slice(detailsStart, detailsEnd) : "";
+
+    try {
+      const parsed = JSON.parse(encodedDetails) as EditableDetail[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((detail, index) => ({
+          id: detail.id || `detail-${index}`,
+          label: detail.label || "Detalle",
+          value: detail.value || "Por definir",
+        }));
+      }
+    } catch {
+      return defaultDetailsBySectionId[section.id] ?? (section.id.startsWith("terreno-") ? genericLandDetails : []);
+    }
+  }
+
+  return defaultDetailsBySectionId[section.id] ?? (section.id.startsWith("terreno-") ? genericLandDetails : []);
+}
+
+export function withVisiblePageCopy(section: EditableSection, pageCopy: string) {
+  const details = getSectionDetails(section);
+  return withSectionDetails({ ...section, pageCopy }, details);
+}
+
+export function withSectionDetails(section: EditableSection, details: EditableDetail[]) {
+  const visibleCopy = getVisiblePageCopy(section) || section.copy;
+  return {
+    ...section,
+    pageCopy: `${visibleCopy}\n\n${DETAILS_MARKER_START}${JSON.stringify(details)}${DETAILS_MARKER_END}`,
+  };
+}
 
 export const editableContentDefaults: EditableSection[] = [
   {
