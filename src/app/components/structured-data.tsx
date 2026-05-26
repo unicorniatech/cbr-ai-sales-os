@@ -2,7 +2,7 @@ import { activeTenant, formatCurrency } from "../config/tenants";
 
 export function StructuredData() {
   const project = activeTenant.project;
-  const baseUrl = "https://cbr-ai-sales-os.vercel.app";
+  const baseUrl = "https://castrejonbienesyraices.com";
   const data = {
     "@context": "https://schema.org",
     "@graph": [

@@ -3,7 +3,7 @@ import { activeTenant } from "./config/tenants";
 import { editableContentDefaults, mergeEditableSections, type EditableSection } from "./lib/editable-content";
 import { isSupabaseConfigured, supabaseRest } from "./lib/server/supabase-rest";
 
-const baseUrl = "https://cbr-ai-sales-os.vercel.app";
+const baseUrl = "https://castrejonbienesyraices.com";
 
 const sectionSlugs = [
   "cumbres-de-bendicion",

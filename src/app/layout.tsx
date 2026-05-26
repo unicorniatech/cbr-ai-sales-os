@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://cbr-ai-sales-os.vercel.app"),
+  metadataBase: new URL("https://castrejonbienesyraices.com"),
   title: {
     default: "Terrenos en Morelos y Jojutla | Castrejón Bienes y Raíces",
     template: "%s | Castrejón Bienes y Raíces",

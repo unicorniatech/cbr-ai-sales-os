@@ -42,7 +42,7 @@ type ChatMessage = {
 const projectFacts = activeTenant.project;
 const knowledgeBase = activeTenant.knowledgeBase;
 const quickActions = activeTenant.quickActions;
-const adminUrl = "https://cbr-ai-sales-os.vercel.app/admin";
+const adminUrl = "https://castrejonbienesyraices.com/admin";
 const terrainVisionStyles = ["Más verde", "Casa económica", "Fachada moderna", "Parque", "Iluminación"];
 const mapQuery = `${projectFacts.location}, México`;
 const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
