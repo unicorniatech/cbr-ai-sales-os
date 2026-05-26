@@ -3,7 +3,7 @@ import Image from "next/image";
 export function VistaDevCredit() {
   return (
     <a
-      href="https://www.vistadev.mx"
+      href="https://vistadev.mx/"
       target="_blank"
       rel="noreferrer"
       className="inline-flex items-center gap-2 text-xs text-white/42 transition hover:text-[#f3d99a]"
@@ -15,7 +15,7 @@ export function VistaDevCredit() {
         height={22}
         className="size-5 object-contain opacity-75"
       />
-      <span>Hecha por VistaDev (www.vistadev.mx)</span>
+      <span>Hecha por VistaDev</span>
     </a>
   );
 }
