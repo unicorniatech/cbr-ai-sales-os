@@ -21,8 +21,10 @@ import {
   ChevronDown,
   FileCheck2,
   MapPin,
+  Menu,
   MessageCircle,
   ShieldCheck,
+  X,
 } from "lucide-react";
 import { AdvisorChat } from "./components/advisor-chat";
 import { StructuredData } from "./components/structured-data";
@@ -112,6 +114,7 @@ function StickyHero() {
   const videoDurationRef = useRef(0);
   const videoReadyRef = useRef(false);
   const mobileVideoPreparedRef = useRef(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
@@ -232,12 +235,13 @@ function StickyHero() {
           }}
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,rgba(204,164,88,0.22),transparent_32%),linear-gradient(115deg,rgba(3,10,22,0.95)_0%,rgba(3,10,22,0.72)_42%,rgba(3,10,22,0.5)_100%)]" />
-        <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-4 px-5 py-5 text-sm text-white/80 sm:px-10">
-          <a href="#inicio" className="max-w-[190px] text-sm font-semibold uppercase leading-tight tracking-[0.18em] text-[#f3d99a] sm:max-w-[260px] sm:text-base" aria-label={brand}>
+        <div className="absolute inset-x-0 top-0 z-10 px-5 py-5 text-sm text-white/80 sm:px-10">
+          <div className="relative flex items-center justify-between gap-4">
+          <a href="#inicio" className="whitespace-nowrap text-[11px] font-semibold uppercase leading-none tracking-[0.12em] text-[#f3d99a] sm:text-xs lg:text-sm lg:tracking-[0.16em]" aria-label={brand}>
             Castrejon Bienes y Raices
           </a>
-          <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/72">
-            <Link href="/proyectos" className="hidden border border-white/18 bg-white/[0.07] px-3 py-2 backdrop-blur transition hover:border-[#d7b56d]/70 hover:text-[#f3d99a] sm:inline-flex">
+          <nav className="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/72 lg:flex">
+            <Link href="/proyectos" className="border border-white/18 bg-white/[0.07] px-3 py-2 backdrop-blur transition hover:border-[#d7b56d]/70 hover:text-[#f3d99a]">
               Terrenos
             </Link>
             <a
@@ -248,6 +252,36 @@ function StickyHero() {
               <ChevronRight size={14} aria-hidden="true" />
             </a>
           </nav>
+          <button
+            type="button"
+            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            className="grid size-10 place-items-center border border-white/18 bg-white/[0.08] text-[#f3d99a] backdrop-blur lg:hidden"
+          >
+            {mobileMenuOpen ? <X size={19} aria-hidden="true" /> : <Menu size={19} aria-hidden="true" />}
+          </button>
+          {mobileMenuOpen ? (
+            <div className="absolute right-0 top-12 w-56 border border-white/12 bg-[#030a16]/94 p-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/72 shadow-2xl backdrop-blur lg:hidden">
+              <Link
+                href="/proyectos"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex min-h-11 items-center justify-between border-b border-white/10 px-4 transition hover:text-[#f3d99a]"
+              >
+                Terrenos
+                <ChevronRight size={14} aria-hidden="true" />
+              </Link>
+              <a
+                href="#contacto"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex min-h-11 items-center justify-between px-4 transition hover:text-[#f3d99a]"
+              >
+                Contacto
+                <ChevronRight size={14} aria-hidden="true" />
+              </a>
+            </div>
+          ) : null}
+          </div>
         </div>
 
         <HeroText progress={scrollYProgress} range={[0.02, 0.06, 0.22, 0.28]}>

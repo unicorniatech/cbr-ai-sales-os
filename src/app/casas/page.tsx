@@ -6,10 +6,13 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
+  ChevronRight,
   CheckCircle2,
   Home,
+  Menu,
   MessageCircle,
   ShieldCheck,
+  X,
 } from "lucide-react";
 import { AdvisorChat } from "../components/advisor-chat";
 import { activeTenant } from "../config/tenants";
@@ -47,26 +50,65 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 }
 
 function HeaderNav() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#030a16]/92 px-5 py-4 text-white backdrop-blur lg:px-10">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-5">
-        <Link href="/" className="max-w-[190px] text-sm font-semibold uppercase leading-tight tracking-[0.18em] text-[#f3d99a] sm:max-w-[260px] sm:text-base" aria-label={activeTenant.brand}>
+      <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-5">
+        <Link href="/" className="whitespace-nowrap text-[11px] font-semibold uppercase leading-none tracking-[0.12em] text-[#f3d99a] sm:text-xs lg:text-sm lg:tracking-[0.16em]" aria-label={activeTenant.brand}>
           Castrejon Bienes y Raices
         </Link>
-        <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/62">
-          <Link href="/#terrenos" className="hidden px-3 py-2 transition hover:text-[#f3d99a] sm:inline-flex">
+        <nav className="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/62 lg:flex">
+          <Link href="/#terrenos" className="px-3 py-2 transition hover:text-[#f3d99a]">
             Terrenos
           </Link>
           <Link href="/casas" className="border border-[#d8b86f]/45 px-3 py-2 text-[#f3d99a]">
             Casas
           </Link>
-          <Link href="/proyectos" className="hidden px-3 py-2 transition hover:text-[#f3d99a] sm:inline-flex">
+          <Link href="/proyectos" className="px-3 py-2 transition hover:text-[#f3d99a]">
             Terrenos
           </Link>
           <a href="#contacto" className="bg-[#d8b86f] px-3 py-2 text-[#07111f]">
             Contacto
           </a>
         </nav>
+        <button
+          type="button"
+          aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((open) => !open)}
+          className="grid size-10 place-items-center border border-white/18 bg-white/[0.08] text-[#f3d99a] backdrop-blur lg:hidden"
+        >
+          {mobileMenuOpen ? <X size={19} aria-hidden="true" /> : <Menu size={19} aria-hidden="true" />}
+        </button>
+        {mobileMenuOpen ? (
+          <div className="absolute right-0 top-12 w-56 border border-white/12 bg-[#030a16]/96 p-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/72 shadow-2xl backdrop-blur lg:hidden">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex min-h-11 items-center justify-between border-b border-white/10 px-4 transition hover:text-[#f3d99a]"
+            >
+              Inicio
+              <ChevronRight size={14} aria-hidden="true" />
+            </Link>
+            <Link
+              href="/proyectos"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex min-h-11 items-center justify-between border-b border-white/10 px-4 transition hover:text-[#f3d99a]"
+            >
+              Terrenos
+              <ChevronRight size={14} aria-hidden="true" />
+            </Link>
+            <a
+              href="#contacto"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex min-h-11 items-center justify-between px-4 transition hover:text-[#f3d99a]"
+            >
+              Contacto
+              <ChevronRight size={14} aria-hidden="true" />
+            </a>
+          </div>
+        ) : null}
       </div>
     </header>
   );
