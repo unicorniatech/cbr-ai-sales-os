@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { AdvisorChat } from "./components/advisor-chat";
 import { StructuredData } from "./components/structured-data";
+import { VistaDevCredit } from "./components/vistadev-credit";
 import { captureLead } from "./lib/lead-store";
 import { activeTenant, formatCurrency } from "./config/tenants";
 import {
@@ -1042,22 +1043,25 @@ export default function Home() {
       <LeadForm />
       <AdvisorChat />
       <footer className="border-t border-white/10 bg-[#030a16] px-6 py-10 text-white/52 lg:px-10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="font-medium text-white">{brand}</p>
-            <p className="mt-1 text-sm">{slogan}</p>
-            <p className="mt-1 text-sm">{contact.address}</p>
+        <div className="mx-auto flex max-w-7xl flex-col gap-7">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-medium text-white">{brand}</p>
+              <p className="mt-1 text-sm">{slogan}</p>
+              <p className="mt-1 text-sm">{contact.address}</p>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="inline-flex items-center gap-2">
+                <ShieldCheck size={16} className="text-[#d8b86f]" />
+                Claridad documental
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <BadgeCheck size={16} className="text-[#d8b86f]" />
+                Trato directo
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="inline-flex items-center gap-2">
-              <ShieldCheck size={16} className="text-[#d8b86f]" />
-              Claridad documental
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <BadgeCheck size={16} className="text-[#d8b86f]" />
-              Trato directo
-            </span>
-          </div>
+          <VistaDevCredit />
         </div>
       </footer>
     </main>

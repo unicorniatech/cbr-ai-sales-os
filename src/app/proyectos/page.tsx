@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Building2, ChevronRight, MapPin, Menu, MessageCircle, ShieldCheck, X } from "lucide-react";
 import { AdvisorChat } from "../components/advisor-chat";
+import { VistaDevCredit } from "../components/vistadev-credit";
 import { activeTenant } from "../config/tenants";
 import {
   editableContentDefaults,
@@ -191,12 +192,15 @@ export default function ProjectsPage() {
       </section>
       <AdvisorChat />
       <footer className="border-t border-white/10 bg-[#030a16] px-6 py-10 text-white/52 lg:px-10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <p className="font-medium text-white">{activeTenant.brand}</p>
-          <span className="inline-flex items-center gap-2 text-sm">
-            <ShieldCheck size={16} className="text-[#d8b86f]" />
-            Preparado para crecer
-          </span>
+        <div className="mx-auto flex max-w-7xl flex-col gap-7">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="font-medium text-white">{activeTenant.brand}</p>
+            <span className="inline-flex items-center gap-2 text-sm">
+              <ShieldCheck size={16} className="text-[#d8b86f]" />
+              Preparado para crecer
+            </span>
+          </div>
+          <VistaDevCredit />
         </div>
       </footer>
     </main>

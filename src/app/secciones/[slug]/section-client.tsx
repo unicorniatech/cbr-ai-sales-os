@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, ChevronLeft, ChevronRight, MapPin, MessageCircle } from "lucide-react";
 import { activeTenant, formatCurrency } from "@/app/config/tenants";
+import { VistaDevCredit } from "@/app/components/vistadev-credit";
 import {
   editableContentDefaults,
   getSectionDetails,
@@ -225,6 +226,9 @@ export function SectionClientPage({ slug }: { slug: string }) {
             WhatsApp {activeTenant.contact.whatsapp}
             <MessageCircle size={18} />
           </a>
+        </div>
+        <div className="mt-10 border-t border-white/10 pt-6">
+          <VistaDevCredit />
         </div>
       </section>
     </main>
