@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://castrejonbienesyraices.com"),
+  metadataBase: new URL("https://www.castrejonbienesyraices.com"),
   title: {
     default: "Terrenos en Morelos y Jojutla | Castrejón Bienes y Raíces",
     template: "%s | Castrejón Bienes y Raíces",

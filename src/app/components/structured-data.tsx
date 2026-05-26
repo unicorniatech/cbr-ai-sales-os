@@ -2,7 +2,7 @@ import { activeTenant, formatCurrency } from "../config/tenants";
 
 export function StructuredData() {
   const project = activeTenant.project;
-  const baseUrl = "https://castrejonbienesyraices.com";
+  const baseUrl = "https://www.castrejonbienesyraices.com";
   const data = {
     "@context": "https://schema.org",
     "@graph": [
