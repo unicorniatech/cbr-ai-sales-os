@@ -785,6 +785,55 @@ function TrustSection() {
   );
 }
 
+function SeoLocalSection() {
+  const locations = [
+    "Jojutla",
+    "Tequesquitengo",
+    "Zacatepec",
+    "Tlaquiltenango",
+    "zona sur de Morelos",
+  ];
+
+  return (
+    <section className="bg-[#071321] px-6 py-24 text-white sm:py-32 lg:px-10">
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.86fr_1.14fr]">
+        <Reveal>
+          <div>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.34em] text-[#d8b86f]">
+              Búsqueda local
+            </p>
+            <h2 className="text-balance text-4xl font-semibold leading-tight sm:text-6xl">
+              Terrenos en Morelos para comprar con claridad.
+            </h2>
+          </div>
+        </Reveal>
+        <Reveal delay={0.08}>
+          <div className="space-y-6 text-lg leading-8 text-white/66">
+            <p>
+              En Castrejón Bienes y Raíces ayudamos a familias e inversionistas que buscan
+              terrenos en Morelos, terrenos en Jojutla y oportunidades en la zona sur con
+              ubicación verificable, información documental y trato directo.
+            </p>
+            <p>
+              La plataforma está preparada para publicar terrenos en Tequesquitengo, terrenos
+              en Zacatepec, terrenos en Tlaquiltenango y nuevas locaciones cercanas. Cada
+              terreno puede mostrar precio, superficie, dirección, fotos, videos, condiciones
+              de visita y datos relevantes para tomar una decisión informada.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-2">
+              {locations.map((location) => (
+                <span key={location} className="border border-white/10 bg-white/[0.035] px-3 py-2 text-sm text-white/68">
+                  Terrenos {location}
+                </span>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 function LeadForm() {
   const interestOptions = useMemo(
     () => ["Terreno", activeTenant.project.name, "Lote sobre calle principal", "Documentación"],
@@ -955,6 +1004,7 @@ export default function Home() {
       <PropertyCards contentMap={contentMap} />
       <LocationSection contentMap={contentMap} />
       <TrustSection />
+      <SeoLocalSection />
       <LeadForm />
       <AdvisorChat />
       <footer className="border-t border-white/10 bg-[#030a16] px-6 py-10 text-white/52 lg:px-10">

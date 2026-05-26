@@ -14,21 +14,42 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://cbr-ai-sales-os.vercel.app"),
-  title: "Grupo Inmobiliario Castrejón Rodríguez",
+  title: {
+    default: "Terrenos en Morelos y Jojutla | Castrejón Bienes y Raíces",
+    template: "%s | Castrejón Bienes y Raíces",
+  },
   description:
-    "Terrenos en Jojutla, Morelos con claridad documental, seguridad jurídica y trato directo.",
+    "Terrenos en Morelos, terrenos en Jojutla y zona sur con precio claro, documentación revisable y trato directo. Cumbres de Bendición y oportunidades en Tequesquitengo, Zacatepec y Tlaquiltenango.",
   keywords: [
-    "terrenos en Jojutla",
-    "terrenos en Morelos",
+    "terrenos en morelos",
+    "terrenos morelos",
+    "terrenos jojutla",
+    "terrenos en jojutla",
+    "terrenos zona sur",
+    "terrenos zona sur morelos",
+    "terrenos tequesquitengo",
+    "terrenos en tequesquitengo",
+    "terrenos zacatepec",
+    "terrenos en zacatepec",
+    "terrenos tlaquiltenango",
+    "terrenos en tlaquiltenango",
+    "terrenos casas",
+    "lotes en morelos",
+    "lotes en jojutla",
+    "terrenos baratos en morelos",
+    "terrenos con mensualidades en morelos",
     "Cumbres de Bendición",
     "Grupo Inmobiliario Castrejón Rodríguez",
-    "lotes en Jojutla",
     "terrenos 200 m2",
   ],
+  alternates: {
+    canonical: "/",
+  },
+  category: "real estate",
   openGraph: {
-    title: "Grupo Inmobiliario Castrejón Rodríguez",
+    title: "Terrenos en Morelos y Jojutla | Castrejón Bienes y Raíces",
     description:
-      "Terrenos en Jojutla, Morelos con claridad documental, seguridad jurídica y trato directo.",
+      "Terrenos en Morelos, Jojutla y zona sur con claridad documental, precios claros, fotos, ubicación y atención directa por WhatsApp.",
     url: "/",
     siteName: "Grupo Inmobiliario Castrejón Rodríguez",
     locale: "es_MX",
@@ -44,8 +65,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Grupo Inmobiliario Castrejón Rodríguez",
-    description: "Terrenos en Jojutla, Morelos con claridad documental y trato directo.",
+    title: "Terrenos en Morelos y Jojutla",
+    description: "Terrenos en Morelos, Jojutla, Tequesquitengo, Zacatepec y Tlaquiltenango con claridad documental.",
     images: ["/videos/CBR-intro-poster.jpg"],
   },
   icons: {

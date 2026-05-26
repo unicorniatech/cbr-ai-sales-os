@@ -117,8 +117,14 @@ export default function ProjectsPage() {
               Locaciones
             </p>
             <h2 className="text-balance text-4xl font-semibold leading-tight sm:text-6xl">
-              Terrenos con su propia información, fotos y seguimiento.
+              Terrenos en Morelos, Jojutla y zona sur con información completa.
             </h2>
+            <p className="mt-6 text-lg leading-8 text-white/62">
+              Encuentra terrenos en Morelos, terrenos en Jojutla, terrenos zona sur y
+              oportunidades para construir casas o invertir cerca de Tequesquitengo,
+              Zacatepec y Tlaquiltenango. Cada publicación puede incluir precio,
+              dirección, superficie, planos, fotos y videos.
+            </p>
           </div>
           <div className="grid gap-5 md:grid-cols-2">
             {landSections.map((item, index) => (
